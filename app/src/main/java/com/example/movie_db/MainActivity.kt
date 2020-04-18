@@ -1,6 +1,7 @@
 package com.example.movie_db
 
 import android.content.Intent
+import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
@@ -11,24 +12,24 @@ import android.widget.Toast
 class MainActivity : AppCompatActivity() {
     
     private lateinit var signUpText: TextView
+    private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var login: EditText
+    private lateinit var password: EditText
+    private lateinit var loginBtn: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.sign_in_activity)
         bindView()
         setData()
-        
-
-        val sharedPreferences = getSharedPreferences("UserInfo", 0)
-        val login = findViewById<EditText>(R.id.et_username)
-        val password = findViewById<EditText>(R.id.et_password)
-        val loginBtn = findViewById<Button>(R.id.login_btn)
-        
     }
     
     private fun bindView(){
         signUpText = findViewById(R.id.tv_link_sign_up)
-        ....    
+        sharedPreferences = getSharedPreferences("UserInfo", 0)
+        login = findViewById<EditText>(R.id.et_username)
+        password = findViewById<EditText>(R.id.et_password)
+        loginBtn = findViewById<Button>(R.id.login_btn)
     }
     
     private fun setData(){

@@ -4,7 +4,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 
@@ -33,7 +32,8 @@ class SignUpActivity: AppCompatActivity() {
                 redactor.putString("password",passwordVal)
                 redactor.apply()
                 Toast.makeText(applicationContext,"New user registered!",Toast.LENGTH_SHORT).show()
-                val toLogin = Intent(applicationContext,MainActivity::class.java)
+                val toLogin = Intent(applicationContext,
+                    MainActivity::class.java)
                 startActivity(toLogin)
             }else{
                 Toast.makeText(applicationContext,"Failed to sign up. The fields are not completed.",Toast.LENGTH_SHORT).show()

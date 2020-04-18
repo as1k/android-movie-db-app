@@ -6,11 +6,10 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.*
 
 object RetrofitService {
-    const val BASE_URL = "https://api.themoviedb.org/3/"
 
     fun getPostApi(): PostApi {
         val retrofit = Retrofit.Builder()
-            .baseUrl(BASE_URL)
+            .baseUrl(BuildConfig.BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
         return retrofit.create(PostApi::class.java)

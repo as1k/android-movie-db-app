@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.viewpager.widget.PagerAdapter
+import com.example.movie_db.*
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 
@@ -26,7 +27,10 @@ class FragmentsActivity : AppCompatActivity() {
         fragmentList.add(fragment3)
         pager = findViewById(R.id.pager)
         pager.setSwipe(false)
-        pagerAdapter = AdapterForPager(supportFragmentManager, fragmentList)
+        pagerAdapter = AdapterForPager(
+            supportFragmentManager,
+            fragmentList
+        )
         pager.adapter = pagerAdapter
 
         bottomNavView.setOnNavigationItemSelectedListener { item ->
