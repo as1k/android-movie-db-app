@@ -25,6 +25,7 @@ class FragmentOne : Fragment() {
     private lateinit var movies: List<Movie>
     private lateinit var recView: RecyclerView
     private lateinit var swipeCase: SwipeRefreshLayout
+    private lateinit var toolbar: TextView
 
     @SuppressLint("SetTextI18n")
     override fun onCreateView(
@@ -35,18 +36,30 @@ class FragmentOne : Fragment() {
         val rootView: ViewGroup = inflater
             .inflate(R.layout.fragments_activity,
                 container, false) as ViewGroup
-
-        val toolbar: TextView = rootView.findViewById(R.id.toolbar)
+        return rootView
+    }
+    
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        if (savedInstanceState == null) {
+            bindView(view)
+            setAdapter()
+        }
+    }
+    
+    private fun bindView(view: View) {
+        toolbar = view.findViewById(R.id.toolbar)
+        recView = view.findViewById(R.id.recycler_view)
+        swipeCase = view.findViewById(R.id.main_content)
         toolbar.text = "Movies"
-
-        recView = rootView.findViewById(R.id.recycler_view)
+    }
+    
+    private fun setAdapter(){
         recView.layoutManager = LinearLayoutManager(activity)
-        swipeCase = rootView.findViewById(R.id.main_content)
         swipeCase.setOnRefreshListener {
             viewsOnInit()
         }
         viewsOnInit()
-        return rootView
     }
 
     @SuppressLint("ShowToast")
