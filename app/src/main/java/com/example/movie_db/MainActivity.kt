@@ -9,17 +9,28 @@ import android.widget.TextView
 import android.widget.Toast
 
 class MainActivity : AppCompatActivity() {
+    
+    private lateinit var signUpText: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.sign_in_activity)
+        bindView()
+        
 
-        val signUpText = findViewById<TextView>(R.id.tv_link_sign_up)
         val sharedPreferences = getSharedPreferences("UserInfo", 0)
         val login = findViewById<EditText>(R.id.et_username)
         val password = findViewById<EditText>(R.id.et_password)
         val loginBtn = findViewById<Button>(R.id.login_btn)
-
+        
+    }
+    
+    private fun bindView(){
+        signUpText = findViewById(R.id.tv_link_sign_up)
+        ....    
+    }
+    
+    private fun setData(){
         signUpText.setOnClickListener {
             val toRegister = Intent(applicationContext, SignUpActivity::class.java)
             startActivity(toRegister)
