@@ -16,6 +16,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.sign_in_activity)
         bindView()
+        setData()
         
 
         val sharedPreferences = getSharedPreferences("UserInfo", 0)
