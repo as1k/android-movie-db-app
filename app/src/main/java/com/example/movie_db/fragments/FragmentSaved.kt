@@ -32,6 +32,13 @@ class FragmentSaved : Fragment() {
     private lateinit var movies: List<Movie>
     private lateinit var toolbar: TextView
 
+    override fun onResume() {
+        super.onResume()
+        swipeRefreshLayout.isRefreshing = true
+        viewsOnInit()
+        swipeRefreshLayout.isRefreshing = false
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
