@@ -9,7 +9,7 @@ import androidx.fragment.app.Fragment
 import com.example.movie_db.R
 import com.example.movie_db.classes.User
 
-class FragmentThree : Fragment() {
+class FragmentProfile : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,

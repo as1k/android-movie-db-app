@@ -16,8 +16,10 @@ import com.google.gson.JsonObject
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 
 class MovieInfoActivity : AppCompatActivity() {
+    lateinit var swipeRefreshLayout: SwipeRefreshLayout
     lateinit var title: TextView
     lateinit var back: ImageButton
     lateinit var review: TextView
@@ -33,6 +35,8 @@ class MovieInfoActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.movie_info_activity)
+
+        swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout)
         title = findViewById(R.id.title)
         review = findViewById(R.id.overview)
         imagePoster = findViewById(R.id.poster)
@@ -50,6 +54,10 @@ class MovieInfoActivity : AppCompatActivity() {
             onBackPressed()
         }
 
+        swipeRefreshLayout.setOnRefreshListener {
+            getMovie()
+        }
+
         save.setOnClickListener {
             if (isSaved) {
                 Glide.with(this).load(R.drawable.ic_bookmark_filled).into(save)
@@ -57,14 +65,21 @@ class MovieInfoActivity : AppCompatActivity() {
                 Glide.with(this).load(R.drawable.ic_bookmark).into(save)
             }
             saveMovie(!isSaved)
+            getMovie()
         }
 
+        getMovie()
+    }
+
+    private fun getMovie() {
+        swipeRefreshLayout.isRefreshing = true
         Retrofit.getPostApi().getMovie(
             movieId,
             BuildConfig.MOVIE_DB_API_KEY
         )
             .enqueue(object : Callback<JsonObject> {
                 override fun onFailure(call: Call<JsonObject>, t: Throwable) {
+                    swipeRefreshLayout.isRefreshing = false
                     Toast.makeText(
                         this@MovieInfoActivity,
                         "Can not find",
@@ -74,7 +89,10 @@ class MovieInfoActivity : AppCompatActivity() {
                     onBackPressed()
                 }
 
-                override fun onResponse(call: Call<JsonObject>, response: Response<JsonObject>) {
+                override fun onResponse(
+                    call: Call<JsonObject>,
+                    response: Response<JsonObject>
+                ) {
                     if (response.isSuccessful) {
                         val movie: Movie = Gson().fromJson(
                             response.body(),
@@ -82,19 +100,19 @@ class MovieInfoActivity : AppCompatActivity() {
                         )
                         writeInViews(movie)
                     }
+                    swipeRefreshLayout.isRefreshing = false
                 }
-
             })
     }
 
-    private fun saveMovie(favourite: Boolean) {
+    private fun saveMovie(favorite: Boolean) {
         val body = JsonObject().apply {
             addProperty("media_type", "movie")
             addProperty("media_id", movieId)
-            addProperty("favorite", favourite)
+            addProperty("favorite", favorite)
         }
 
-        Retrofit.getPostApi().estimate(
+        Retrofit.getPostApi().addRemoveSaved(
             User.user?.userId,
             BuildConfig.MOVIE_DB_API_KEY,
             User.user?.sessionId,

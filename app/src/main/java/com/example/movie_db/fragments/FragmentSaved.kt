@@ -24,7 +24,7 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.lang.Exception
 
-class FragmentTwo : Fragment() {
+class FragmentSaved : Fragment() {
 
     private lateinit var recView: RecyclerView
     private lateinit var adapter: AdapterForMovies
