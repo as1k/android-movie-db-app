@@ -31,7 +31,7 @@ android {
         jvmTarget = "1.8"
     }
     buildTypes.each{
-        it.buildConfigField 'String', 'THE_MOVIE_DB_API_TOKEN', MyTheMovieDBApiToken
+        it.buildConfigField 'String', 'MOVIE_DB_API_KEY', ApiKey
         it.buildConfigField 'String', 'BASE_URL', BASE_URL
     }
 }

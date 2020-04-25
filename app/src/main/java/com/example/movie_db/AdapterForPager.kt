@@ -5,12 +5,14 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 
 @Suppress("DEPRECATION")
-class AdapterForPager(fm: FragmentManager?, private val fragmentList: List<Fragment>) :
-    FragmentPagerAdapter(fm!!) {
+class AdapterForPager(fragmentManager: FragmentManager?, private val fragments: List<Fragment>) :
+    FragmentPagerAdapter(fragmentManager!!) {
+
     override fun getItem(position: Int): Fragment {
-    return fragmentList[position]
+    return fragments[position]
     }
+
     override fun getCount(): Int {
-        return fragmentList.size
+        return fragments.size
     }
 }
