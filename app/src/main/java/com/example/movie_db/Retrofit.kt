@@ -53,7 +53,7 @@ interface PostApi {
     ): Call<MovieResponse>
 
     @POST("account/{account_id}/favorite")
-    fun estimate(
+    fun addRemoveSaved(
         @Path("account_id") accountId: Int?,
         @Query("api_key") apiKey: String,
         @Query("session_id") sessionId: String?,
