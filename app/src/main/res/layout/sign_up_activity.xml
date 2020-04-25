@@ -35,7 +35,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:background="@drawable/rounded_white"
+        android:background="@drawable/round_white"
         android:orientation="vertical"
         android:padding="15dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -68,7 +68,7 @@
             android:padding="10dp"
             android:textColor="@color/textGray"
             android:textColorHint="#bababa"
-            android:textCursorDrawable="@drawable/cursor_color"
+            android:textCursorDrawable="@drawable/ic_color_of_cursor"
             android:textFontWeight="100"
             android:textSize="18sp" />
 
@@ -84,7 +84,7 @@
             android:padding="10dp"
             android:textColor="@color/textGray"
             android:textColorHint="#bababa"
-            android:textCursorDrawable="@drawable/cursor_color"
+            android:textCursorDrawable="@drawable/ic_color_of_cursor"
             android:textFontWeight="100"
             android:textSize="18sp" />
 
@@ -102,7 +102,7 @@
             android:padding="10dp"
             android:textColor="@color/textGray"
             android:textColorHint="#bababa"
-            android:textCursorDrawable="@drawable/cursor_color"
+            android:textCursorDrawable="@drawable/ic_color_of_cursor"
             android:textFontWeight="100"
             android:textSize="18sp" />
 
@@ -117,7 +117,7 @@
             android:padding="10dp"
             android:text="REGISTER"
             android:textColor="@color/white"
-            android:textCursorDrawable="@drawable/cursor_color"
+            android:textCursorDrawable="@drawable/ic_color_of_cursor"
             android:textSize="20sp"
             android:textStyle="bold" />
 

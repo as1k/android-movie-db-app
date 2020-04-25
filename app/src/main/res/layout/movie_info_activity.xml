@@ -107,7 +107,7 @@
                 android:layout_marginStart="20dp"
                 android:layout_marginLeft="20dp"
                 android:gravity="center_vertical"
-                android:text="Adult:"
+                android:text="Age limit:"
                 android:fontFamily="@font/g_light"
                 android:textColor="@color/textGray"
                 android:textSize="16sp"
@@ -169,18 +169,27 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/line4" />
 
+            <ImageButton
+                android:id="@+id/save"
+                android:layout_width="80dp"
+                android:layout_height="100dp"
+                android:layout_marginTop="32dp"
+                android:background="@android:color/transparent"
+                android:scaleType="fitCenter"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/popularity" />
+
             <TextView
                 android:id="@+id/popularity"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="150dp"
-                android:layout_marginLeft="150dp"
                 android:fontFamily="@font/g_light"
                 android:gravity="center_vertical"
                 android:textSize="16sp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/rate" />
-
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
@@ -194,9 +203,9 @@
         android:background="@android:color/transparent"
         android:padding="11dp"
         android:scaleType="fitCenter"
-        android:tint="@drawable/selector"
+        android:tint="@drawable/own_selector"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:src="@drawable/ic_arrow_back_black_24dp"/>
+        android:src="@drawable/ic_arrow_back"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

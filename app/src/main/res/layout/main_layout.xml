@@ -15,11 +15,11 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
             android:background="@color/themeColor"
-            app:itemIconTint="@drawable/selector"
+            app:itemIconTint="@drawable/own_selector"
             app:itemTextColor="@color/colorLight"
             app:menu="@menu/menu" />
 
-        <com.example.movie_db.MyViewPager
+        <com.example.movie_db.MoviesViewPager
         android:id="@+id/pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

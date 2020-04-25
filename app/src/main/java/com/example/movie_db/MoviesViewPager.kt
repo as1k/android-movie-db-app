@@ -6,28 +6,28 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import androidx.viewpager.widget.ViewPager
 
-class MyViewPager : ViewPager {
-    private var swipable = false
+class MoviesViewPager : ViewPager {
+    private var canSwipeDown = false
 
     constructor(context: Context?) : super(context!!)
     constructor(context: Context?, attrs: AttributeSet?) : super(
         context!!,
         attrs
     ) {
-        swipable = true
+        canSwipeDown = true
     }
 
     override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
-        return if (swipable) super.onInterceptTouchEvent(ev) else false
+        return if (canSwipeDown) super.onInterceptTouchEvent(ev) else false
     }
 
-    fun setSwipe(swipe: Boolean) {
-        swipable = swipe
+    fun setSwiping(swipe: Boolean) {
+        canSwipeDown = swipe
     }
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        return if (swipable) {
+        return if (canSwipeDown) {
             super.onTouchEvent(event)
         } else false
     }

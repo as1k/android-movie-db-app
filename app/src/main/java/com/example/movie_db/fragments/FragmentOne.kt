@@ -1,6 +1,5 @@
-package com.example.movie_db
+package com.example.movie_db.fragments
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -14,33 +13,36 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.example.movie_db.AdapterForMovies
+import com.example.movie_db.BuildConfig
+import com.example.movie_db.R
+import com.example.movie_db.Retrofit
+import com.example.movie_db.classes.Movie
+import com.example.movie_db.classes.MovieResponse
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import java.lang.Exception
+import kotlin.collections.ArrayList
 
-class FragmentTwo: Fragment() {
+class FragmentOne : Fragment() {
 
-    private lateinit var recView: RecyclerView
     private lateinit var adapter: AdapterForMovies
-    private lateinit var swipeCase: SwipeRefreshLayout
     private lateinit var movies: List<Movie>
+    private lateinit var recView: RecyclerView
+    private lateinit var swipeRefreshLayout: SwipeRefreshLayout
     private lateinit var toolbar: TextView
 
-    @SuppressLint("SetTextI18n")
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val rootView = inflater
+        return inflater
             .inflate(
                 R.layout.fragments_activity,
                 container, false) as ViewGroup
-
-        return rootView
     }
-
+    
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         if (savedInstanceState == null) {
@@ -48,32 +50,32 @@ class FragmentTwo: Fragment() {
             setAdapter()
         }
     }
-
+    
     private fun bindView(view: View) {
         toolbar = view.findViewById(R.id.toolbar)
         recView = view.findViewById(R.id.recycler_view)
-        swipeCase = view.findViewById(R.id.main_content)
-        toolbar.text = "Saved"
+        swipeRefreshLayout = view.findViewById(R.id.main_content)
+        toolbar.text = "Movies"
     }
-
+    
     private fun setAdapter(){
         recView.layoutManager = LinearLayoutManager(activity)
-        swipeCase.setOnRefreshListener {
+        swipeRefreshLayout.setOnRefreshListener {
             viewsOnInit()
         }
         viewsOnInit()
     }
 
-    @SuppressLint("ShowToast")
     private fun jsonOnLoad() {
         try {
-            if (BuildConfig.THE_MOVIE_DB_API_TOKEN.isEmpty()) {
+            if (BuildConfig.MOVIE_DB_API_KEY.isEmpty()) {
                 return
             }
-            RetrofitService.getPostApi().getTrendingMovieList(BuildConfig.THE_MOVIE_DB_API_TOKEN)
+            Retrofit.getPostApi()
+                .getMovies(BuildConfig.MOVIE_DB_API_KEY)
                 .enqueue(object : Callback<MovieResponse> {
                     override fun onFailure(call: Call<MovieResponse>, t: Throwable) {
-                        swipeCase.isRefreshing = false
+                        swipeRefreshLayout.isRefreshing = false
                     }
 
                     override fun onResponse(
@@ -86,21 +88,25 @@ class FragmentTwo: Fragment() {
                             adapter.movies = list as List<Movie>
                             adapter.notifyDataSetChanged()
                         }
-                        swipeCase.isRefreshing = false
-
+                        swipeRefreshLayout.isRefreshing = false
                     }
                 })
-        } catch (e: Exception) {
+        } catch (e: Exception){
             Toast.makeText(activity, e.toString(), Toast.LENGTH_SHORT)
         }
     }
 
-    private fun viewsOnInit() {
+    private fun viewsOnInit(){
         movies = ArrayList()
-        this.adapter = activity?.applicationContext?.let { AdapterForMovies(it, movies) }!!
+        this.adapter = activity?.applicationContext?.let {
+            AdapterForMovies(
+                it,
+                movies
+            )
+        }!!
         recView.layoutManager = GridLayoutManager(activity, 3)
+        recView.itemAnimator= DefaultItemAnimator()
         recView.adapter = this.adapter
-        recView.itemAnimator = DefaultItemAnimator()
         this.adapter.notifyDataSetChanged()
 
         jsonOnLoad()

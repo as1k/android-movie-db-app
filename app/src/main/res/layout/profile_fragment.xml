@@ -54,7 +54,7 @@
         app:layout_constraintTop_toBottomOf="@+id/toolbar" />
 
     <TextView
-        android:id="@+id/profile_firstname"
+        android:id="@+id/profile_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
@@ -67,17 +67,29 @@
         app:layout_constraintTop_toBottomOf="@+id/profilePhoto" />
 
     <TextView
+        android:id="@+id/profile_sobachka"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:fontFamily="@font/g_light"
+        android:text="\@"
+        android:textColor="@color/darkgray"
+        android:textSize="15sp"
+        app:layout_constraintStart_toStartOf="@+id/profile_name"
+        app:layout_constraintTop_toBottomOf="@+id/profile_name" />
+
+    <TextView
         android:id="@+id/profile_username"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="28dp"
+        android:layout_marginStart="2dp"
+        android:layout_marginTop="8dp"
         android:fontFamily="@font/g_light"
-        android:text="\@batman"
+        android:text="batman"
         android:textColor="@color/darkgray"
-        android:textSize="30sp"
-        app:layout_constraintEnd_toEndOf="@+id/profile_lastname"
-        app:layout_constraintStart_toStartOf="@+id/profile_firstname"
-        app:layout_constraintTop_toBottomOf="@+id/profile_firstname" />
+        android:textSize="15sp"
+        app:layout_constraintStart_toEndOf="@+id/profile_sobachka"
+        app:layout_constraintTop_toBottomOf="@+id/profile_name" />
 
     <Button
         android:id="@+id/button"
@@ -92,7 +104,7 @@
         android:text="Edit Profile"
         android:textAllCaps="false"
         android:textColor="@color/white"
-        android:textCursorDrawable="@drawable/cursor_color"
+        android:textCursorDrawable="@drawable/ic_color_of_cursor"
         android:textSize="20sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
