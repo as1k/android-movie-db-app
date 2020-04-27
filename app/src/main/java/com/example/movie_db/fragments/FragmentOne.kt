@@ -1,7 +1,6 @@
 package com.example.movie_db.fragments
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,19 +17,29 @@ import com.example.movie_db.BuildConfig
 import com.example.movie_db.R
 import com.example.movie_db.Retrofit
 import com.example.movie_db.classes.Movie
-import com.example.movie_db.classes.MovieResponse
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import kotlin.collections.ArrayList
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlin.coroutines.CoroutineContext
 
-class FragmentOne : Fragment() {
+class FragmentOne : Fragment(), CoroutineScope {
 
     private lateinit var adapter: AdapterForMovies
     private lateinit var movies: List<Movie>
     private lateinit var recView: RecyclerView
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
     private lateinit var toolbar: TextView
+    private val job = Job()
+
+    override fun onDestroy() {
+        super.onDestroy()
+        job.cancel()
+    }
+
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Main + job
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -66,33 +75,19 @@ class FragmentOne : Fragment() {
         viewsOnInit()
     }
 
-    private fun jsonOnLoad() {
-        try {
-            if (BuildConfig.MOVIE_DB_API_KEY.isEmpty()) {
-                return
+    private fun jsonOnLoadCoroutine() {
+        launch {
+            swipeRefreshLayout.isRefreshing = true
+            val response = Retrofit.getPostApi()
+                .getMoviesCoroutine(BuildConfig.MOVIE_DB_API_KEY)
+            if (response.isSuccessful) {
+                val list = response.body()?.getResults()
+                adapter.movies = list as List<Movie>
+                adapter.notifyDataSetChanged()
+            } else {
+                Toast.makeText(context, "Error", Toast.LENGTH_SHORT).show()
             }
-            Retrofit.getPostApi()
-                .getMovies(BuildConfig.MOVIE_DB_API_KEY)
-                .enqueue(object : Callback<MovieResponse> {
-                    override fun onFailure(call: Call<MovieResponse>, t: Throwable) {
-                        swipeRefreshLayout.isRefreshing = false
-                    }
-
-                    override fun onResponse(
-                        call: Call<MovieResponse>,
-                        response: Response<MovieResponse>
-                    ) {
-                        Log.d("postList", response.body().toString())
-                        if (response.isSuccessful) {
-                            val list = response.body()?.getResults()
-                            adapter.movies = list as List<Movie>
-                            adapter.notifyDataSetChanged()
-                        }
-                        swipeRefreshLayout.isRefreshing = false
-                    }
-                })
-        } catch (e: Exception){
-            Toast.makeText(activity, e.toString(), Toast.LENGTH_SHORT)
+            swipeRefreshLayout.isRefreshing = false
         }
     }
 
@@ -109,6 +104,6 @@ class FragmentOne : Fragment() {
         recView.adapter = this.adapter
         this.adapter.notifyDataSetChanged()
 
-        jsonOnLoad()
+        jsonOnLoadCoroutine()
     }
 }

@@ -17,17 +17,29 @@ import com.example.movie_db.classes.LoginResponse
 import com.example.movie_db.classes.SessionResponse
 import com.google.gson.Gson
 import com.google.gson.JsonObject
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import android.widget.ProgressBar
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlin.coroutines.CoroutineContext
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), CoroutineScope {
 
     private lateinit var login: EditText
     private lateinit var password: EditText
     private lateinit var loginBtn: Button
     private lateinit var progressBar: ProgressBar
+    private val job = Job()
+
+    override fun onDestroy() {
+        super.onDestroy()
+        job.cancel()
+    }
+
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Main + job
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,7 +58,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun setData(){
         loginBtn.setOnClickListener {
-            onLoggingIn(
+            onLoggingInCoroutine(
                 login.text.toString(),
                 password.text.toString()
             )
@@ -54,34 +66,27 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun onLoggingIn(login: String, password: String) {
-        var token: TokenResponse?
-        Retrofit.getPostApi()
-            .getToken(BuildConfig.MOVIE_DB_API_KEY)
-            .enqueue(object : Callback<JsonObject> {
-                override fun onFailure(call: Call<JsonObject>, t: Throwable) {
-                    noSuchUser()
-                    progressBar.visibility = View.GONE
-                }
-
-                override fun onResponse(call: Call<JsonObject>, response: Response<JsonObject>) {
-                    if (response.isSuccessful) {
-                        token = Gson().fromJson(response.body(), TokenResponse::class.java)
-                        if (token != null) {
-                            val request = token!!.requestToken
-                            val body = JsonObject().apply {
-                                addProperty("username", login)
-                                addProperty("password", password)
-                                addProperty("request_token", request)
-                            }
-                            getLoginResponse(body)
-                        }
-                    } else {
-                        progressBar.visibility = View.GONE
+    private fun onLoggingInCoroutine(login: String, password: String) {
+        launch {
+            val response =
+                Retrofit.getPostApi().getTokenCoroutine(BuildConfig.MOVIE_DB_API_KEY)
+            if (response.isSuccessful) {
+                progressBar.visibility = View.GONE
+                val token = Gson().fromJson(response.body(), TokenResponse::class.java)
+                if (token != null) {
+                    val request = token.requestToken
+                    val body = JsonObject().apply {
+                        addProperty("username", login)
+                        addProperty("password", password)
+                        addProperty("request_token", request)
                     }
+                    getLoginResponseCoroutine(body)
                 }
-
-            })
+            } else {
+                noSuchUser()
+                progressBar.visibility = View.GONE
+            }
+        }
     }
 
     private fun saveSession() {
@@ -106,88 +111,58 @@ class MainActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
-    fun getAccount(session: String?) {
-        var user: UserResponse?
-        Retrofit.getPostApi().getCurrentAccount(
-            BuildConfig.MOVIE_DB_API_KEY,
-            session!!
-        ).enqueue(object : Callback<JsonObject> {
-            override fun onFailure(call: Call<JsonObject>, t: Throwable) {
+    private fun getAccountCoroutine(session: String?) {
+        launch {
+            val response = Retrofit.getPostApi()
+                .getCurrentAccountCoroutine(BuildConfig.MOVIE_DB_API_KEY, session!!)
+            if (response.isSuccessful) {
+                progressBar.visibility = View.GONE
+                val account = Gson().fromJson(response.body(), UserResponse::class.java)
+                if (account != null)
+                    loginSuccess(account, session)
+            } else
+                progressBar.visibility = View.GONE
                 noSuchUser()
-                progressBar.visibility = View.GONE
-            }
-
-            override fun onResponse(call: Call<JsonObject>, response: Response<JsonObject>) {
-                if (response.isSuccessful) {
-                    user = Gson().fromJson(
-                        response.body(),
-                        UserResponse::class.java
-                    )
-                    if (user != null) {
-                        loginSuccess(user!!, session)
-                    }
-                } else {
-                    progressBar.visibility = View.GONE
-                }
-            }
-
-        })
+        }
     }
 
-    fun getSession(body: JsonObject) {
-        var session: SessionResponse?
-        Retrofit.getPostApi().getSession(
-            BuildConfig.MOVIE_DB_API_KEY, body)
-            .enqueue(object : Callback<JsonObject> {
-                override fun onFailure(call: Call<JsonObject>, t: Throwable) {
-                    progressBar.visibility = View.GONE
-                    noSuchUser()
+    private fun getSessionCoroutine(body: JsonObject) {
+        launch {
+            val response = Retrofit.getPostApi()
+                .getSessionCoroutine(BuildConfig.MOVIE_DB_API_KEY, body)
+            if (response.isSuccessful) {
+                progressBar.visibility = View.GONE
+                val session = Gson().fromJson(response.body(), SessionResponse::class.java)
+                if (session != null) {
+                    val sessionId = session.sessionId
+                    getAccountCoroutine(sessionId)
                 }
+            } else
+                progressBar.visibility = View.GONE
+                noSuchUser()
+        }
+    }
 
-                override fun onResponse(call: Call<JsonObject>, response: Response<JsonObject>) {
-                    if (response.isSuccessful) {
-                        session = Gson().fromJson(
-                            response.body(),
-                            SessionResponse::class.java
+    private fun getLoginResponseCoroutine(body: JsonObject) {
+        launch {
+            val response = Retrofit.getPostApi()
+                .loginCoroutine(BuildConfig.MOVIE_DB_API_KEY, body)
+            if (response.isSuccessful) {
+                progressBar.visibility = View.GONE
+                val loginResponse = Gson().fromJson(response.body(), LoginResponse::class.java)
+                if (loginResponse != null) {
+                    val body = JsonObject().apply {
+                        addProperty(
+                            "request_token",
+                            loginResponse.requestToken.toString()
                         )
-                        if (session != null) {
-                            val sessionId = session!!.sessionId
-                            getAccount(sessionId)
-                        }
-                    } else {
-                        progressBar.visibility = View.GONE
                     }
+                    getSessionCoroutine(body)
                 }
-            })
-    }
-
-    fun getLoginResponse(body: JsonObject) {
-        var loginResponse: LoginResponse?
-        Retrofit.getPostApi().login(
-            BuildConfig.MOVIE_DB_API_KEY,
-            body
-        ).enqueue(object : Callback<JsonObject> {
-            override fun onFailure(call: Call<JsonObject>, t: Throwable) {
+            } else {
                 progressBar.visibility = View.GONE
+                noSuchUser()
             }
-
-            override fun onResponse(call: Call<JsonObject>, response: Response<JsonObject>) {
-                if (response.isSuccessful) {
-                    loginResponse = Gson().fromJson(response.body(), LoginResponse::class.java)
-                    if (loginResponse != null) {
-                        val body = JsonObject().apply {
-                            addProperty(
-                                "request_token",
-                                loginResponse!!.requestToken.toString()
-                            )
-                        }
-                        getSession(body)
-                    }
-                } else {
-                    noSuchUser()
-                    progressBar.visibility = View.GONE
-                }
-            }
-        })
+        }
     }
 }
