@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
 import android.widget.*
 import com.example.movie_db.R
 import com.example.movie_db.Retrofit
@@ -19,12 +20,14 @@ import com.google.gson.JsonObject
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import android.widget.ProgressBar
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var login: EditText
     private lateinit var password: EditText
     private lateinit var loginBtn: Button
+    private lateinit var progressBar: ProgressBar
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,6 +40,8 @@ class MainActivity : AppCompatActivity() {
         login = findViewById(R.id.et_username)
         password = findViewById(R.id.et_password)
         loginBtn = findViewById(R.id.login_btn)
+        progressBar = findViewById(R.id.progressBar)
+        progressBar.visibility = View.GONE
     }
 
     private fun setData(){
@@ -45,6 +50,7 @@ class MainActivity : AppCompatActivity() {
                 login.text.toString(),
                 password.text.toString()
             )
+            progressBar.visibility = View.VISIBLE
         }
     }
 
@@ -55,6 +61,7 @@ class MainActivity : AppCompatActivity() {
             .enqueue(object : Callback<JsonObject> {
                 override fun onFailure(call: Call<JsonObject>, t: Throwable) {
                     noSuchUser()
+                    progressBar.visibility = View.GONE
                 }
 
                 override fun onResponse(call: Call<JsonObject>, response: Response<JsonObject>) {
@@ -69,6 +76,8 @@ class MainActivity : AppCompatActivity() {
                             }
                             getLoginResponse(body)
                         }
+                    } else {
+                        progressBar.visibility = View.GONE
                     }
                 }
 
@@ -105,6 +114,7 @@ class MainActivity : AppCompatActivity() {
         ).enqueue(object : Callback<JsonObject> {
             override fun onFailure(call: Call<JsonObject>, t: Throwable) {
                 noSuchUser()
+                progressBar.visibility = View.GONE
             }
 
             override fun onResponse(call: Call<JsonObject>, response: Response<JsonObject>) {
@@ -113,8 +123,11 @@ class MainActivity : AppCompatActivity() {
                         response.body(),
                         UserResponse::class.java
                     )
-                    if (user != null)
+                    if (user != null) {
                         loginSuccess(user!!, session)
+                    }
+                } else {
+                    progressBar.visibility = View.GONE
                 }
             }
 
@@ -127,6 +140,7 @@ class MainActivity : AppCompatActivity() {
             BuildConfig.MOVIE_DB_API_KEY, body)
             .enqueue(object : Callback<JsonObject> {
                 override fun onFailure(call: Call<JsonObject>, t: Throwable) {
+                    progressBar.visibility = View.GONE
                     noSuchUser()
                 }
 
@@ -140,10 +154,10 @@ class MainActivity : AppCompatActivity() {
                             val sessionId = session!!.sessionId
                             getAccount(sessionId)
                         }
+                    } else {
+                        progressBar.visibility = View.GONE
                     }
-
                 }
-
             })
     }
 
@@ -154,6 +168,7 @@ class MainActivity : AppCompatActivity() {
             body
         ).enqueue(object : Callback<JsonObject> {
             override fun onFailure(call: Call<JsonObject>, t: Throwable) {
+                progressBar.visibility = View.GONE
             }
 
             override fun onResponse(call: Call<JsonObject>, response: Response<JsonObject>) {
@@ -170,6 +185,7 @@ class MainActivity : AppCompatActivity() {
                     }
                 } else {
                     noSuchUser()
+                    progressBar.visibility = View.GONE
                 }
             }
         })
