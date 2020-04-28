@@ -3,7 +3,6 @@
     package="com.example.movie_db">
 
     <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:allowBackup="true"
@@ -14,9 +13,9 @@
         android:theme="@style/AppTheme">
 
         <activity android:name=".activities.Activator"/>
-        <activity android:name=".activities.MainActivity"/>
+        <activity android:name=".activities.FragmentsActivity"/>
         <activity android:name=".activities.MovieInfoActivity"/>
-        <activity android:name=".activities.SignInActivity">
+        <activity android:name=".activities.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.movie_db.activities.MovieInfoActivity
 import com.example.movie_db.classes.Movie
-import com.bumptech.glide.load.engine.DiskCacheStrategy
 
 class AdapterForMovies(var context: Context, var movies: List<Movie>) :
     RecyclerView.Adapter<AdapterForMovies.MyViewHolder>() {
@@ -25,19 +24,18 @@ class AdapterForMovies(var context: Context, var movies: List<Movie>) :
             title.text = post?.title
 
             Glide.with(context)
-                .load(post!!.getPathToPoster())
-                .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+                .load(post?.getPathToPoster())
                 .into(mainPoster)
 
             view.setOnClickListener {
                 val intent= Intent(view.context, MovieInfoActivity::class.java)
-                intent.putExtra("movie_id", post.id)
+                intent.putExtra("movie_id", post?.id)
                 view.context.startActivity(intent)
             }
         }
     }
 
-    override fun getItemCount(): Int = movies.size
+    override fun getItemCount(): Int = movies?.size
 
     override fun onCreateViewHolder(viewGroup: ViewGroup, i: Int): MyViewHolder {
         val view: View = LayoutInflater.from(viewGroup.context)
