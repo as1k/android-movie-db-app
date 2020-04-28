@@ -12,42 +12,22 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.example.movie_db.AdapterForMovies
-import com.example.movie_db.BuildConfig
 import com.example.movie_db.R
-import com.example.movie_db.model.network.Retrofit
-import com.example.movie_db.model.data.authentication.User
 import com.example.movie_db.model.data.movie.Movie
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import kotlin.coroutines.CoroutineContext
-import android.content.Context
-import com.example.movie_db.model.database.MovieDao
-import com.example.movie_db.model.database.MovieDatabase
-import kotlinx.coroutines.*
-import java.lang.Exception
-import com.example.movie_db.view.activities.MovieInfoActivity
-import com.google.gson.JsonObject
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import com.example.movie_db.view_model.MoviesVM
+import com.example.movie_db.view_model.VMProviderFactory
 
-class FragmentSaved : Fragment(), CoroutineScope {
+
+class FragmentSaved : Fragment() {
 
     private lateinit var recView: RecyclerView
     private lateinit var adapter: AdapterForMovies
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
     private lateinit var movies: List<Movie>
     private lateinit var toolbar: TextView
-    private val job = Job()
-
-    private var movieDao: MovieDao? = null
-
-    override fun onDestroy() {
-        super.onDestroy()
-        job.cancel()
-    }
-
-    override val coroutineContext: CoroutineContext
-        get() = Dispatchers.Main + job
+    private lateinit var moviesVM: MoviesVM
 
     override fun onResume() {
         super.onResume()
@@ -68,16 +48,20 @@ class FragmentSaved : Fragment(), CoroutineScope {
             ) as ViewGroup
 
         recView = rootView.findViewById(R.id.recycler_view)
+        recView.layoutManager = LinearLayoutManager(activity)
         toolbar = rootView.findViewById(R.id.toolbar)
         toolbar.text = "Favorites"
 
-        movieDao = MovieDatabase.getDatabase(activity as Context).movieDao()
+        val vmProviderFactory = VMProviderFactory(this.context!!)
+        moviesVM = ViewModelProvider(this, vmProviderFactory)
+            .get(MoviesVM::class.java)
 
-        recView.layoutManager = LinearLayoutManager(activity)
         swipeRefreshLayout = rootView.findViewById(R.id.main_content)
         swipeRefreshLayout.setOnRefreshListener {
             viewsOnInit()
+            moviesVM.getSavedMovies()
         }
+
         viewsOnInit()
         return rootView
     }
@@ -90,56 +74,21 @@ class FragmentSaved : Fragment(), CoroutineScope {
         recView.adapter = adapter
         adapter.notifyDataSetChanged()
 
-        jsonOnLoadCoroutine()
-    }
-
-    private fun jsonOnLoadCoroutine() {
-        launch {
-            swipeRefreshLayout.isRefreshing = true
-            val list = withContext(Dispatchers.IO) {
-                try {
-                    if (MovieInfoActivity.notSynced) {
-                        val savedMovieList = movieDao?.getAll()
-                        if (savedMovieList != null)
-                            for (movie in savedMovieList) {
-                                val body = JsonObject().apply {
-                                    addProperty("media_type", "movie")
-                                    addProperty("media_id", movie.id)
-                                    addProperty("favorite", movie.isSaved)
-                                }
-                                Retrofit.getPostApi().addRemoveSavedCoroutine(
-                                    User.user?.userId,
-                                    BuildConfig.MOVIE_DB_API_KEY,
-                                    User.user?.sessionId,
-                                    body
-                                )
-                            }
-                        MovieInfoActivity.notSynced = false
-                    }
-                    val response = Retrofit.getPostApi()
-                        .getSavedMoviesCoroutine(
-                            User.user?.userId!!,
-                            BuildConfig.MOVIE_DB_API_KEY,
-                            User.user?.sessionId.toString()
-                        )
-                    if (response.isSuccessful) {
-                        val result = response.body()?.getResults()
-                        if (!result.isNullOrEmpty()) {
-                            for (movie in result)
-                                movie?.isSaved = true
-                            movieDao?.insertAll(result as List<Movie>)
-                        }
-                        result
-                    } else {
-                        movieDao?.getFavorite() ?: emptyList()
-                    }
-                } catch (e: Exception) {
-                    movieDao?.getFavorite() ?: emptyList()
+        moviesVM.getSavedMovies()
+        moviesVM.liveData.observe(this, Observer { result ->
+            when (result) {
+                is MoviesVM.State.ShowLoading -> {
+                    swipeRefreshLayout.isRefreshing = true
+                }
+                is MoviesVM.State.HideLoading -> {
+                    swipeRefreshLayout.isRefreshing = false
+                }
+                is MoviesVM.State.Result -> {
+                    adapter.movies = result.list
+                    adapter.notifyDataSetChanged()
                 }
             }
-            adapter.movies = list as List<Movie>
-            adapter.notifyDataSetChanged()
-            swipeRefreshLayout.isRefreshing = false
-        }
+        })
     }
+
 }

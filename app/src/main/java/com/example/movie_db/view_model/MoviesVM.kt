@@ -72,6 +72,55 @@ class MoviesVM(context: Context) : ViewModel(), CoroutineScope {
         }
     }
 
+    fun getSavedMovies() {
+        launch {
+            liveData.value = State.ShowLoading
+            val list = withContext(Dispatchers.IO) {
+                try {
+                    if (MovieInfoActivity.notSynced) {
+                        val savedMovieList = movieDao?.getAll()
+                        if (savedMovieList != null)
+                            for (movie in savedMovieList) {
+                                val body = JsonObject().apply {
+                                    addProperty("media_type", "movie")
+                                    addProperty("media_id", movie.id)
+                                    addProperty("favorite", movie.isSaved)
+                                }
+                                Retrofit.getPostApi().addRemoveSavedCoroutine(
+                                    User.user?.userId,
+                                    BuildConfig.MOVIE_DB_API_KEY,
+                                    User.user?.sessionId,
+                                    body
+                                )
+                            }
+                        MovieInfoActivity.notSynced = false
+                    }
+                    val response = Retrofit.getPostApi()
+                        .getSavedMoviesCoroutine(
+                            User.user?.userId!!,
+                            BuildConfig.MOVIE_DB_API_KEY,
+                            User.user?.sessionId.toString()
+                        )
+                    if (response.isSuccessful) {
+                        val result = response.body()?.getResults()
+                        if (!result.isNullOrEmpty()) {
+                            for (movie in result)
+                                movie?.isSaved = true
+                            movieDao?.insertAll(result as List<Movie>)
+                        }
+                        result
+                    } else {
+                        movieDao?.getFavorite() ?: emptyList()
+                    }
+                } catch (e: Exception) {
+                    movieDao?.getFavorite() ?: emptyList()
+                }
+            }
+            liveData.value = State.HideLoading
+            liveData.value = State.Result(list as List<Movie>)
+        }
+    }
+
     sealed class State {
         object ShowLoading : State()
         object HideLoading : State()
