@@ -32,11 +32,12 @@ class MainActivity : AppCompatActivity() {
         fragmentList.add(fragment3)
         pager = findViewById(R.id.pager)
         pager.setSwiping(false)
-        pager.adapter = pagerAdapter
         pagerAdapter = AdapterForPager(
             supportFragmentManager,
             fragmentList
         )
+
+        pager.adapter = pagerAdapter
 
         bottomNavView.setOnNavigationItemSelectedListener { item ->
             when (item.itemId) {
