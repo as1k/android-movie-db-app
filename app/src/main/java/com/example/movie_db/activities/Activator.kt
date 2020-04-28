@@ -21,13 +21,17 @@ import java.lang.reflect.Type
 import kotlin.coroutines.CoroutineContext
 
 class Activator : AppCompatActivity(), CoroutineScope {
+
     private val job = Job()
+
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job
+
     override fun onDestroy() {
         super.onDestroy()
         job.cancel()
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.sign_up_activity)
@@ -39,11 +43,12 @@ class Activator : AppCompatActivity(), CoroutineScope {
         if (User.user != null && User.user!!.sessionId != null)
             getAccountCoroutine(User.user!!.sessionId.toString())
         else {
-            val intent = Intent(this, MainActivity::class.java)
+            val intent = Intent(this, SignInActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(intent)
         }
     }
+
     private fun saveSession() {
         val savedUser: SharedPreferences =
             this.getSharedPreferences("current_user", Context.MODE_PRIVATE)
@@ -57,7 +62,7 @@ class Activator : AppCompatActivity(), CoroutineScope {
         User.user = user
         User.user!!.sessionId = session
         saveSession()
-        val intent = Intent(this, FragmentsActivity::class.java)
+        val intent = Intent(this, MainActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
     }
@@ -73,14 +78,14 @@ class Activator : AppCompatActivity(), CoroutineScope {
                         loginSuccess(account, session)
                     else {
                         User.user = null
-                        val intent = Intent(this@Activator, MainActivity::class.java)
+                        val intent = Intent(this@Activator, SignInActivity::class.java)
                         intent.flags =
                             Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                         startActivity(intent)
                     }
                 }
             } catch (e: Exception) {
-                val intent = Intent(this@Activator, FragmentsActivity::class.java)
+                val intent = Intent(this@Activator, MainActivity::class.java)
                 intent.flags =
                     Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 startActivity(intent)

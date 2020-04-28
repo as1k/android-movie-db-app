@@ -76,7 +76,7 @@ class FragmentOne : Fragment(), CoroutineScope {
         movieDao = MovieDatabase.getDatabase(activity as Context).movieDao()
     }
 
-    private fun setAdapter(){
+    private fun setAdapter() {
         recView.layoutManager = LinearLayoutManager(activity)
         swipeRefreshLayout.setOnRefreshListener {
             viewsOnInit()
@@ -128,7 +128,7 @@ class FragmentOne : Fragment(), CoroutineScope {
         }
     }
 
-    private fun viewsOnInit(){
+    private fun viewsOnInit() {
         movies = ArrayList()
         this.adapter = activity?.applicationContext?.let {
             AdapterForMovies(
@@ -143,4 +143,5 @@ class FragmentOne : Fragment(), CoroutineScope {
 
         jsonOnLoadCoroutine()
     }
+
 }

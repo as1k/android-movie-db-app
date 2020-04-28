@@ -2,14 +2,13 @@ package com.example.movie_db
 
 import com.example.movie_db.classes.MovieResponse
 import com.google.gson.JsonObject
-
-import retrofit2.Call
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.*
 
 object Retrofit {
+
     fun getPostApi(): PostApi {
         val retrofit = Retrofit.Builder()
             .baseUrl(BuildConfig.BASE_URL)
@@ -20,6 +19,7 @@ object Retrofit {
 }
 
 interface PostApi {
+
     @GET("authentication/token/new")
     suspend fun getTokenCoroutine(
         @Query("api_key") apiKey: String
@@ -86,4 +86,5 @@ interface PostApi {
         @Query("api_key") apiKey: String,
         @Body body: JsonObject
     ): Response<JsonObject>
+
 }

@@ -23,17 +23,18 @@ import com.example.movie_db.classes.*
 import java.lang.Exception
 
 class MovieInfoActivity : AppCompatActivity(), CoroutineScope {
-    lateinit var swipeRefreshLayout: SwipeRefreshLayout
-    lateinit var title: TextView
-    lateinit var back: ImageButton
-    lateinit var review: TextView
-    lateinit var imagePoster: ImageView
-    lateinit var rating: TextView
-    lateinit var releaseDate: TextView
-    lateinit var popularity: TextView
-    lateinit var adultContent: TextView
-    lateinit var save: ImageButton
-    var isSaved: Boolean = false
+
+    private lateinit var swipeRefreshLayout: SwipeRefreshLayout
+    private lateinit var title: TextView
+    private lateinit var back: ImageButton
+    private lateinit var review: TextView
+    private lateinit var imagePoster: ImageView
+    private lateinit var rating: TextView
+    private lateinit var releaseDate: TextView
+    private lateinit var popularity: TextView
+    private lateinit var adultContent: TextView
+    private lateinit var save: ImageButton
+    private var isSaved: Boolean = false
     private var movieId: Int = 1
     private val job = Job()
 
@@ -66,10 +67,8 @@ class MovieInfoActivity : AppCompatActivity(), CoroutineScope {
         back = findViewById(R.id.back)
         save = findViewById(R.id.save)
         movieId = intent.getIntExtra("movie_id", 1)
-
-        movieDao = MovieDatabase.getDatabase(context = this).movieDao()
-
         window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN
+        movieDao = MovieDatabase.getDatabase(context = this).movieDao()
 
         back.setOnClickListener {
             onBackPressed()
@@ -88,7 +87,6 @@ class MovieInfoActivity : AppCompatActivity(), CoroutineScope {
             saveMovieCoroutine(!isSaved)
             getMovieCoroutine()
         }
-
         getMovieCoroutine()
     }
 
