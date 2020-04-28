@@ -9,28 +9,48 @@ import com.example.movie_db.R
 import com.example.movie_db.Retrofit
 import com.example.movie_db.BuildConfig
 import com.example.movie_db.classes.User
-import com.example.movie_db.classes.FavoriteResponse
+import com.example.movie_db.classes.SavingResponse
 import com.example.movie_db.classes.Movie
 import com.google.gson.Gson
 import com.google.gson.JsonObject
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlin.coroutines.CoroutineContext
+import com.example.movie_db.classes.*
+import java.lang.Exception
 
-class MovieInfoActivity : AppCompatActivity() {
-    lateinit var swipeRefreshLayout: SwipeRefreshLayout
-    lateinit var title: TextView
-    lateinit var back: ImageButton
-    lateinit var review: TextView
-    lateinit var imagePoster: ImageView
-    lateinit var rating: TextView
-    lateinit var releaseDate: TextView
-    lateinit var popularity: TextView
-    lateinit var adultContent: TextView
-    lateinit var save: ImageButton
-    var isSaved: Boolean = false
+class MovieInfoActivity : AppCompatActivity(), CoroutineScope {
+
+    private lateinit var swipeRefreshLayout: SwipeRefreshLayout
+    private lateinit var title: TextView
+    private lateinit var back: ImageButton
+    private lateinit var review: TextView
+    private lateinit var imagePoster: ImageView
+    private lateinit var rating: TextView
+    private lateinit var releaseDate: TextView
+    private lateinit var popularity: TextView
+    private lateinit var adultContent: TextView
+    private lateinit var save: ImageButton
+    private var isSaved: Boolean = false
     private var movieId: Int = 1
+    private val job = Job()
+
+    companion object {
+        var notSynced: Boolean = false
+    }
+
+    private var movieDao: MovieDao? = null
+
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Main + job
+
+    override fun onDestroy() {
+        super.onDestroy()
+        job.cancel()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,15 +67,15 @@ class MovieInfoActivity : AppCompatActivity() {
         back = findViewById(R.id.back)
         save = findViewById(R.id.save)
         movieId = intent.getIntExtra("movie_id", 1)
-
         window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN
+        movieDao = MovieDatabase.getDatabase(context = this).movieDao()
 
         back.setOnClickListener {
             onBackPressed()
         }
 
         swipeRefreshLayout.setOnRefreshListener {
-            getMovie()
+            getMovieCoroutine()
         }
 
         save.setOnClickListener {
@@ -64,98 +84,84 @@ class MovieInfoActivity : AppCompatActivity() {
             } else {
                 Glide.with(this).load(R.drawable.ic_bookmark).into(save)
             }
-            saveMovie(!isSaved)
-            getMovie()
+            saveMovieCoroutine(!isSaved)
+            getMovieCoroutine()
         }
-
-        getMovie()
+        getMovieCoroutine()
     }
 
-    private fun getMovie() {
-        swipeRefreshLayout.isRefreshing = true
-        Retrofit.getPostApi().getMovie(
-            movieId,
-            BuildConfig.MOVIE_DB_API_KEY
-        )
-            .enqueue(object : Callback<JsonObject> {
-                override fun onFailure(call: Call<JsonObject>, t: Throwable) {
-                    swipeRefreshLayout.isRefreshing = false
-                    Toast.makeText(
-                        this@MovieInfoActivity,
-                        "Can not find",
-                        Toast.LENGTH_SHORT
-                    )
-                        .show()
-                    onBackPressed()
-                }
-
-                override fun onResponse(
-                    call: Call<JsonObject>,
-                    response: Response<JsonObject>
-                ) {
-                    if (response.isSuccessful) {
-                        val movie: Movie = Gson().fromJson(
-                            response.body(),
-                            Movie::class.java
-                        )
-                        writeInViews(movie)
+    private fun getMovieCoroutine() {
+        launch {
+            try {
+                val response = Retrofit.getPostApi()
+                    .getMovieCoroutine(movieId, BuildConfig.MOVIE_DB_API_KEY)
+                if (response.isSuccessful) {
+                    val result = Gson().fromJson(response.body(), Movie::class.java)
+                    writeInViews(result)
+                    isSavedCoroutine()
+                    if (result == null) {
+                        movieDao?.insertMovieInfo(result as Movie)
                     }
-                    swipeRefreshLayout.isRefreshing = false
+                    result
+                } else {
+                    movieDao?.getMovieInfo(movieId)
                 }
-            })
-    }
-
-    private fun saveMovie(favorite: Boolean) {
-        val body = JsonObject().apply {
-            addProperty("media_type", "movie")
-            addProperty("media_id", movieId)
-            addProperty("favorite", favorite)
+            } catch (e: Exception) {
+                writeInViews(movieDao?.getMovieInfo(movieId)!!)
+            }
         }
-
-        Retrofit.getPostApi().addRemoveSaved(
-            User.user?.userId,
-            BuildConfig.MOVIE_DB_API_KEY,
-            User.user?.sessionId,
-            body
-        )
-            .enqueue(object : Callback<JsonObject> {
-                override fun onFailure(call: Call<JsonObject>, t: Throwable) { }
-
-                override fun onResponse(
-                    call: Call<JsonObject>,
-                    response: Response<JsonObject>
-                ) { }
-            })
     }
 
-    private fun isSaved() {
-        Retrofit.getPostApi()
-            .isSaved(movieId, BuildConfig.MOVIE_DB_API_KEY, User.user?.sessionId)
-            .enqueue(object : Callback<JsonObject> {
-                override fun onFailure(call: Call<JsonObject>, t: Throwable) {
+    private fun saveMovieCoroutine(isFavorite: Boolean) {
+        launch {
+            try {
+                val body = JsonObject().apply {
+                    addProperty("media_type", "movie")
+                    addProperty("media_id", movieId)
+                    addProperty("favorite", isFavorite)
                 }
-
-                override fun onResponse(
-                    call: Call<JsonObject>,
-                    response: Response<JsonObject>
-                ) {
-                    if (response.isSuccessful) {
-                        var like = Gson().fromJson(
-                            response.body(),
-                            FavoriteResponse::class.java
-                        ).favorite
-                        isSaved = if (like) {
-                            save.setImageResource(R.drawable.ic_bookmark)
-                            true
-                        } else {
-                            save.setImageResource(R.drawable.ic_bookmark_filled)
-                            false
-                        }
-                    }
-
+                Retrofit.getPostApi().addRemoveSavedCoroutine(
+                    User.user?.userId,
+                    BuildConfig.MOVIE_DB_API_KEY,
+                    User.user?.sessionId,
+                    body
+                )
+            } catch (e: Exception) {
+                val movie = movieDao?.getMovieInfo(movieId)
+                if (isSaved) {
+                    movie?.isSaved = false
+                    isSaved = false
+                } else {
+                    movie?.isSaved = true
+                    isSaved = true
                 }
-            })
+                movieDao?.insertMovieInfo(movie!!)
+                notSynced = true
+            }
+        }
+    }
 
+    private fun isSavedCoroutine() {
+        launch {
+            val response = Retrofit.getPostApi().isSavedCoroutine(
+                movieId,
+                BuildConfig.MOVIE_DB_API_KEY,
+                User.user?.sessionId
+            )
+            if (response.isSuccessful) {
+                val like = Gson().fromJson(
+                    response.body(),
+                    SavingResponse::class.java
+                ).favorite
+                isSaved = if (like) {
+                    save.setImageResource(R.drawable.ic_bookmark)
+                    true
+                } else {
+                    save.setImageResource(R.drawable.ic_bookmark_filled)
+                    false
+                }
+            }
+        }
     }
 
     fun writeInViews(movie: Movie) {
@@ -170,6 +176,10 @@ class MovieInfoActivity : AppCompatActivity() {
             adultContent.text = "12+"
         rating.text = movie.voteRating.toString()
         popularity.text = movie.popularity.toString()
-        isSaved()
+        isSaved = movie.isSaved
+        if (isSaved)
+            save.setImageResource(R.drawable.ic_bookmark)
+        else
+            save.setImageResource(R.drawable.ic_bookmark_filled)
     }
 }

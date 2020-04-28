@@ -1,42 +1,50 @@
 package com.example.movie_db.classes
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.google.gson.annotations.SerializedName
+import java.io.Serializable
 
-private var baseImageUrl: String = "https://image.tmdb.org/t/p/w500"
-
-class Movie {
+@Entity(tableName = "movie_table")
+data class Movie(
+    @PrimaryKey
     @SerializedName("id")
-    var id: Int? = null
+    var id: Int,
+
+    @SerializedName("isSaved")
+    var isSaved: Boolean,
 
     @SerializedName("title")
-    var title: String? = null
+    var title: String?,
 
     @SerializedName("overview")
-    var review: String? = null
+    var review: String?,
 
     @SerializedName("release_date")
-    var releaseDate: String? = null
+    var releaseDate: String?,
 
     @SerializedName("popularity")
-    var popularity: Double? = null
+    var popularity: Double,
 
     @SerializedName("vote_average")
-    var voteRating: Double? = null
+    var voteRating: Double,
 
     @SerializedName("adultContent")
-    var adultContent = false
+    var adultContent: Boolean,
 
     @SerializedName("backdrop_path")
-    private var pathToBackground: String? = null
+    private var pathToBackground: String,
 
     @SerializedName("poster_path")
-    private var pathToPoster: String? = null
+    private var pathToPoster: String
 
-    fun getPathToPoster():String {
-        return baseImageUrl + pathToPoster
+) : Serializable {
+
+    fun getPathToPoster(): String {
+        return "https://image.tmdb.org/t/p/w500$pathToPoster"
     }
 
-    fun getPathToBackground():String{
-        return baseImageUrl + pathToBackground
+    fun getPathToBackground(): String {
+        return "https://image.tmdb.org/t/p/w500$pathToBackground"
     }
 }
