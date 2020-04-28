@@ -100,7 +100,7 @@ class MovieInfoActivity : AppCompatActivity(), CoroutineScope {
                     writeInViews(result)
                     isSavedCoroutine()
                     if (result == null) {
-                        movieDao?.insertMovieInfo(result as Movie)
+                        movieDao?.insertMovieInfo(result)
                     }
                     result
                 } else {
