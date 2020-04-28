@@ -16,7 +16,7 @@
                 android:background="@color/colorLight"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                tools:context=".activities.MovieInfoActivity">
+                tools:context=".view.activities.MovieInfoActivity">
 
             <ScrollView
                 android:id="@+id/scrollView2"

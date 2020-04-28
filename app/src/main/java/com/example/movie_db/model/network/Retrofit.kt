@@ -1,6 +1,7 @@
-package com.example.movie_db
+package com.example.movie_db.model.network
 
-import com.example.movie_db.classes.MovieResponse
+import com.example.movie_db.BuildConfig
+import com.example.movie_db.model.data.movie.MovieResponse
 import com.google.gson.JsonObject
 import retrofit2.Response
 import retrofit2.Retrofit

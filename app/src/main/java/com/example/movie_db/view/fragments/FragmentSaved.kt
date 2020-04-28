@@ -1,4 +1,4 @@
-package com.example.movie_db.fragments
+package com.example.movie_db.view.fragments
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -14,39 +14,46 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.example.movie_db.AdapterForMovies
 import com.example.movie_db.BuildConfig
 import com.example.movie_db.R
-import com.example.movie_db.Retrofit
-import com.example.movie_db.classes.Movie
-import kotlin.collections.ArrayList
+import com.example.movie_db.model.network.Retrofit
+import com.example.movie_db.model.data.authentication.User
+import com.example.movie_db.model.data.movie.Movie
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 import android.content.Context
-import com.example.movie_db.classes.*
+import com.example.movie_db.model.database.MovieDao
+import com.example.movie_db.model.database.MovieDatabase
 import kotlinx.coroutines.*
 import java.lang.Exception
-import com.example.movie_db.activities.MovieInfoActivity
-import com.example.movie_db.classes.User
+import com.example.movie_db.view.activities.MovieInfoActivity
 import com.google.gson.JsonObject
 
-class FragmentOne : Fragment(), CoroutineScope {
+class FragmentSaved : Fragment(), CoroutineScope {
 
-    private lateinit var adapter: AdapterForMovies
-    private lateinit var movies: List<Movie>
     private lateinit var recView: RecyclerView
+    private lateinit var adapter: AdapterForMovies
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
+    private lateinit var movies: List<Movie>
     private lateinit var toolbar: TextView
     private val job = Job()
 
     private var movieDao: MovieDao? = null
 
-    override val coroutineContext: CoroutineContext
-        get() = Dispatchers.Main + job
-
     override fun onDestroy() {
         super.onDestroy()
         job.cancel()
+    }
+
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Main + job
+
+    override fun onResume() {
+        super.onResume()
+        swipeRefreshLayout.isRefreshing = true
+        viewsOnInit()
+        swipeRefreshLayout.isRefreshing = false
     }
 
     override fun onCreateView(
@@ -54,34 +61,36 @@ class FragmentOne : Fragment(), CoroutineScope {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater
+        val rootView: ViewGroup = inflater
             .inflate(
                 R.layout.fragments_activity,
-                container, false) as ViewGroup
-    }
+                container, false
+            ) as ViewGroup
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        if (savedInstanceState == null) {
-            bindView(view)
-            setAdapter()
-        }
-    }
+        recView = rootView.findViewById(R.id.recycler_view)
+        toolbar = rootView.findViewById(R.id.toolbar)
+        toolbar.text = "Favorites"
 
-    private fun bindView(view: View) {
-        toolbar = view.findViewById(R.id.toolbar)
-        recView = view.findViewById(R.id.recycler_view)
-        swipeRefreshLayout = view.findViewById(R.id.main_content)
-        toolbar.text = "Movies"
         movieDao = MovieDatabase.getDatabase(activity as Context).movieDao()
-    }
 
-    private fun setAdapter() {
         recView.layoutManager = LinearLayoutManager(activity)
+        swipeRefreshLayout = rootView.findViewById(R.id.main_content)
         swipeRefreshLayout.setOnRefreshListener {
             viewsOnInit()
         }
         viewsOnInit()
+        return rootView
+    }
+
+    private fun viewsOnInit() {
+        movies = ArrayList()
+        adapter = activity?.applicationContext?.let { AdapterForMovies(it, movies) }!!
+        recView.layoutManager = GridLayoutManager(activity, 3)
+        recView.itemAnimator = DefaultItemAnimator()
+        recView.adapter = adapter
+        adapter.notifyDataSetChanged()
+
+        jsonOnLoadCoroutine()
     }
 
     private fun jsonOnLoadCoroutine() {
@@ -108,18 +117,24 @@ class FragmentOne : Fragment(), CoroutineScope {
                         MovieInfoActivity.notSynced = false
                     }
                     val response = Retrofit.getPostApi()
-                        .getMoviesCoroutine(BuildConfig.MOVIE_DB_API_KEY)
+                        .getSavedMoviesCoroutine(
+                            User.user?.userId!!,
+                            BuildConfig.MOVIE_DB_API_KEY,
+                            User.user?.sessionId.toString()
+                        )
                     if (response.isSuccessful) {
                         val result = response.body()?.getResults()
                         if (!result.isNullOrEmpty()) {
+                            for (movie in result)
+                                movie?.isSaved = true
                             movieDao?.insertAll(result as List<Movie>)
                         }
                         result
                     } else {
-                        movieDao?.getAll() ?: emptyList()
+                        movieDao?.getFavorite() ?: emptyList()
                     }
                 } catch (e: Exception) {
-                    movieDao?.getAll() ?: emptyList()
+                    movieDao?.getFavorite() ?: emptyList()
                 }
             }
             adapter.movies = list as List<Movie>
@@ -127,21 +142,4 @@ class FragmentOne : Fragment(), CoroutineScope {
             swipeRefreshLayout.isRefreshing = false
         }
     }
-
-    private fun viewsOnInit() {
-        movies = ArrayList()
-        this.adapter = activity?.applicationContext?.let {
-            AdapterForMovies(
-                it,
-                movies
-            )
-        }!!
-        recView.layoutManager = GridLayoutManager(activity, 3)
-        recView.itemAnimator= DefaultItemAnimator()
-        recView.adapter = this.adapter
-        this.adapter.notifyDataSetChanged()
-
-        jsonOnLoadCoroutine()
-    }
-
 }

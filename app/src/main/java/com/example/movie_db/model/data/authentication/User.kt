@@ -1,4 +1,4 @@
-package com.example.movie_db.classes
+package com.example.movie_db.model.data.authentication
 
 class User {
     companion object{

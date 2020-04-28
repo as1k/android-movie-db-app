@@ -1,4 +1,4 @@
-package com.example.movie_db.activities
+package com.example.movie_db.view.activities
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
@@ -7,18 +7,21 @@ import androidx.viewpager.widget.PagerAdapter
 import com.example.movie_db.MoviesViewPager
 import com.example.movie_db.AdapterForPager
 import com.example.movie_db.R
-import com.example.movie_db.fragments.FragmentOne
-import com.example.movie_db.fragments.FragmentProfile
-import com.example.movie_db.fragments.FragmentSaved
+import com.example.movie_db.view.fragments.FragmentOne
+import com.example.movie_db.view.fragments.FragmentProfile
+import com.example.movie_db.view.fragments.FragmentSaved
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var pager: MoviesViewPager
     private lateinit var pagerAdapter: PagerAdapter
-    private var fragment1: Fragment = FragmentOne()
-    private var fragment2: Fragment = FragmentSaved()
-    private var fragment3: Fragment = FragmentProfile()
+    private var fragment1: Fragment =
+        FragmentOne()
+    private var fragment2: Fragment =
+        FragmentSaved()
+    private var fragment3: Fragment =
+        FragmentProfile()
     private var fragmentList: MutableList<Fragment> = ArrayList()
     private lateinit var bottomNavView: BottomNavigationView
 

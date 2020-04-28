@@ -9,8 +9,8 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.example.movie_db.activities.MovieInfoActivity
-import com.example.movie_db.classes.Movie
+import com.example.movie_db.view.activities.MovieInfoActivity
+import com.example.movie_db.model.data.movie.Movie
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 
 class AdapterForMovies(var context: Context, var movies: List<Movie>) :

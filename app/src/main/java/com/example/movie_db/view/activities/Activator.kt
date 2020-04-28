@@ -1,4 +1,4 @@
-package com.example.movie_db.activities
+package com.example.movie_db.view.activities
 
 import android.content.Context
 import android.content.Intent
@@ -7,9 +7,9 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.example.movie_db.BuildConfig
 import com.example.movie_db.R
-import com.example.movie_db.Retrofit
-import com.example.movie_db.classes.UserResponse
-import com.example.movie_db.classes.User
+import com.example.movie_db.model.network.Retrofit
+import com.example.movie_db.model.data.authentication.UserResponse
+import com.example.movie_db.model.data.authentication.User
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.CoroutineScope

@@ -1,4 +1,4 @@
-package com.example.movie_db.activities
+package com.example.movie_db.view.activities
 
 import android.os.Bundle
 import android.view.View
@@ -6,11 +6,11 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.example.movie_db.R
-import com.example.movie_db.Retrofit
+import com.example.movie_db.model.network.Retrofit
 import com.example.movie_db.BuildConfig
-import com.example.movie_db.classes.User
-import com.example.movie_db.classes.SavingResponse
-import com.example.movie_db.classes.Movie
+import com.example.movie_db.model.data.authentication.User
+import com.example.movie_db.model.data.movie.SavingResponse
+import com.example.movie_db.model.data.movie.Movie
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -19,7 +19,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
-import com.example.movie_db.classes.*
+import com.example.movie_db.model.database.MovieDao
+import com.example.movie_db.model.database.MovieDatabase
 import java.lang.Exception
 
 class MovieInfoActivity : AppCompatActivity(), CoroutineScope {

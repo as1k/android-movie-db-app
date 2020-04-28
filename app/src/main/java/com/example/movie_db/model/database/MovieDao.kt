@@ -1,9 +1,11 @@
-package com.example.movie_db.classes
+package com.example.movie_db.model.database
 
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import com.example.movie_db.model.data.movie.Movie
+
 @Dao
 interface MovieDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
