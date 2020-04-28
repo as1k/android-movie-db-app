@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.GridLayoutManager
@@ -23,6 +22,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
+import android.content.Context
+import com.example.movie_db.classes.*
+import kotlinx.coroutines.*
+import java.lang.Exception
+import com.example.movie_db.activities.MovieInfoActivity
+import com.example.movie_db.classes.User
+import com.google.gson.JsonObject
 
 class FragmentOne : Fragment(), CoroutineScope {
 
@@ -33,13 +39,15 @@ class FragmentOne : Fragment(), CoroutineScope {
     private lateinit var toolbar: TextView
     private val job = Job()
 
+    private var movieDao: MovieDao? = null
+
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Main + job
+
     override fun onDestroy() {
         super.onDestroy()
         job.cancel()
     }
-
-    override val coroutineContext: CoroutineContext
-        get() = Dispatchers.Main + job
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -51,7 +59,7 @@ class FragmentOne : Fragment(), CoroutineScope {
                 R.layout.fragments_activity,
                 container, false) as ViewGroup
     }
-    
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         if (savedInstanceState == null) {
@@ -59,14 +67,15 @@ class FragmentOne : Fragment(), CoroutineScope {
             setAdapter()
         }
     }
-    
+
     private fun bindView(view: View) {
         toolbar = view.findViewById(R.id.toolbar)
         recView = view.findViewById(R.id.recycler_view)
         swipeRefreshLayout = view.findViewById(R.id.main_content)
         toolbar.text = "Movies"
+        movieDao = MovieDatabase.getDatabase(activity as Context).movieDao()
     }
-    
+
     private fun setAdapter(){
         recView.layoutManager = LinearLayoutManager(activity)
         swipeRefreshLayout.setOnRefreshListener {
@@ -78,15 +87,43 @@ class FragmentOne : Fragment(), CoroutineScope {
     private fun jsonOnLoadCoroutine() {
         launch {
             swipeRefreshLayout.isRefreshing = true
-            val response = Retrofit.getPostApi()
-                .getMoviesCoroutine(BuildConfig.MOVIE_DB_API_KEY)
-            if (response.isSuccessful) {
-                val list = response.body()?.getResults()
-                adapter.movies = list as List<Movie>
-                adapter.notifyDataSetChanged()
-            } else {
-                Toast.makeText(context, "Error", Toast.LENGTH_SHORT).show()
+            val list = withContext(Dispatchers.IO) {
+                try {
+                    if (MovieInfoActivity.notSynced) {
+                        val savedMovieList = movieDao?.getAll()
+                        if (savedMovieList != null)
+                            for (movie in savedMovieList) {
+                                val body = JsonObject().apply {
+                                    addProperty("media_type", "movie")
+                                    addProperty("media_id", movie.id)
+                                    addProperty("favorite", movie.isSaved)
+                                }
+                                Retrofit.getPostApi().addRemoveSavedCoroutine(
+                                    User.user?.userId,
+                                    BuildConfig.MOVIE_DB_API_KEY,
+                                    User.user?.sessionId,
+                                    body
+                                )
+                            }
+                        MovieInfoActivity.notSynced = false
+                    }
+                    val response = Retrofit.getPostApi()
+                        .getMoviesCoroutine(BuildConfig.MOVIE_DB_API_KEY)
+                    if (response.isSuccessful) {
+                        val result = response.body()?.getResults()
+                        if (!result.isNullOrEmpty()) {
+                            movieDao?.insertAll(result as List<Movie>)
+                        }
+                        result
+                    } else {
+                        movieDao?.getAll() ?: emptyList()
+                    }
+                } catch (e: Exception) {
+                    movieDao?.getAll() ?: emptyList()
+                }
             }
+            adapter.movies = list as List<Movie>
+            adapter.notifyDataSetChanged()
             swipeRefreshLayout.isRefreshing = false
         }
     }
