@@ -6,24 +6,14 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.example.movie_db.R
-import com.example.movie_db.model.network.Retrofit
-import com.example.movie_db.BuildConfig
-import com.example.movie_db.model.data.authentication.User
-import com.example.movie_db.model.data.movie.SavingResponse
 import com.example.movie_db.model.data.movie.Movie
-import com.google.gson.Gson
-import com.google.gson.JsonObject
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import kotlin.coroutines.CoroutineContext
-import com.example.movie_db.model.database.MovieDao
-import com.example.movie_db.model.database.MovieDatabase
-import java.lang.Exception
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import com.example.movie_db.view_model.MovieInfoVM
+import com.example.movie_db.view_model.VMProviderFactory
 
-class MovieInfoActivity : AppCompatActivity(), CoroutineScope {
+class MovieInfoActivity : AppCompatActivity() {
 
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
     private lateinit var title: TextView
@@ -37,25 +27,19 @@ class MovieInfoActivity : AppCompatActivity(), CoroutineScope {
     private lateinit var save: ImageButton
     private var isSaved: Boolean = false
     private var movieId: Int = 1
-    private val job = Job()
+    private lateinit var movieInfoVM: MovieInfoVM
 
     companion object {
         var notSynced: Boolean = false
     }
 
-    private var movieDao: MovieDao? = null
-
-    override val coroutineContext: CoroutineContext
-        get() = Dispatchers.Main + job
-
-    override fun onDestroy() {
-        super.onDestroy()
-        job.cancel()
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.movie_info_activity)
+
+        val vmProviderFactory = VMProviderFactory(this)
+        movieInfoVM = ViewModelProvider(this, vmProviderFactory)
+            .get(MovieInfoVM::class.java)
 
         swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout)
         title = findViewById(R.id.title)
@@ -69,14 +53,42 @@ class MovieInfoActivity : AppCompatActivity(), CoroutineScope {
         save = findViewById(R.id.save)
         movieId = intent.getIntExtra("movie_id", 1)
         window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN
-        movieDao = MovieDatabase.getDatabase(context = this).movieDao()
+
+        movieInfoVM.isFavoriteMovie(movieId)
+        movieInfoVM.getMovie(movieId)
+        fun observe() {
+            movieInfoVM.liveData.observe(this, Observer { result ->
+                when (result) {
+                    is MovieInfoVM.State.ShowLoading -> {
+                        swipeRefreshLayout.isRefreshing = true
+                    }
+                    is MovieInfoVM.State.HideLoading -> {
+                        swipeRefreshLayout.isRefreshing = false
+                    }
+                    is MovieInfoVM.State.Result -> {
+                        writeInViews(result.movie)
+                    }
+                    is MovieInfoVM.State.IsFavorite -> {
+                        isSaved = result.isFavorite
+                        if (isSaved) {
+                            Glide.with(this).load(R.drawable.ic_bookmark).into(save)
+                        } else {
+                            Glide.with(this).load(R.drawable.ic_bookmark_filled).into(save)
+                        }
+                    }
+                }
+            })
+        }
+        observe()
 
         back.setOnClickListener {
             onBackPressed()
         }
 
         swipeRefreshLayout.setOnRefreshListener {
-            getMovieCoroutine()
+            movieInfoVM.isFavoriteMovie(movieId)
+            movieInfoVM.getMovie(movieId)
+            observe()
         }
 
         save.setOnClickListener {
@@ -85,83 +97,9 @@ class MovieInfoActivity : AppCompatActivity(), CoroutineScope {
             } else {
                 Glide.with(this).load(R.drawable.ic_bookmark).into(save)
             }
-            saveMovieCoroutine(!isSaved)
-            getMovieCoroutine()
-        }
-        getMovieCoroutine()
-    }
-
-    private fun getMovieCoroutine() {
-        launch {
-            try {
-                val response = Retrofit.getPostApi()
-                    .getMovieCoroutine(movieId, BuildConfig.MOVIE_DB_API_KEY)
-                if (response.isSuccessful) {
-                    val result = Gson().fromJson(response.body(), Movie::class.java)
-                    writeInViews(result)
-                    isSavedCoroutine()
-                    if (result == null) {
-                        movieDao?.insertMovieInfo(result)
-                    }
-                    result
-                } else {
-                    movieDao?.getMovieInfo(movieId)
-                }
-            } catch (e: Exception) {
-                writeInViews(movieDao?.getMovieInfo(movieId)!!)
-            }
-        }
-    }
-
-    private fun saveMovieCoroutine(isFavorite: Boolean) {
-        launch {
-            try {
-                val body = JsonObject().apply {
-                    addProperty("media_type", "movie")
-                    addProperty("media_id", movieId)
-                    addProperty("favorite", isFavorite)
-                }
-                Retrofit.getPostApi().addRemoveSavedCoroutine(
-                    User.user?.userId,
-                    BuildConfig.MOVIE_DB_API_KEY,
-                    User.user?.sessionId,
-                    body
-                )
-            } catch (e: Exception) {
-                val movie = movieDao?.getMovieInfo(movieId)
-                if (isSaved) {
-                    movie?.isSaved = false
-                    isSaved = false
-                } else {
-                    movie?.isSaved = true
-                    isSaved = true
-                }
-                movieDao?.insertMovieInfo(movie!!)
-                notSynced = true
-            }
-        }
-    }
-
-    private fun isSavedCoroutine() {
-        launch {
-            val response = Retrofit.getPostApi().isSavedCoroutine(
-                movieId,
-                BuildConfig.MOVIE_DB_API_KEY,
-                User.user?.sessionId
-            )
-            if (response.isSuccessful) {
-                val like = Gson().fromJson(
-                    response.body(),
-                    SavingResponse::class.java
-                ).favorite
-                isSaved = if (like) {
-                    save.setImageResource(R.drawable.ic_bookmark)
-                    true
-                } else {
-                    save.setImageResource(R.drawable.ic_bookmark_filled)
-                    false
-                }
-            }
+            movieInfoVM.isFavoriteMovie(movieId)
+            movieInfoVM.getMovie(movieId)
+            observe()
         }
     }
 
@@ -177,10 +115,6 @@ class MovieInfoActivity : AppCompatActivity(), CoroutineScope {
             adultContent.text = "12+"
         rating.text = movie.voteRating.toString()
         popularity.text = movie.popularity.toString()
-        isSaved = movie.isSaved
-        if (isSaved)
-            save.setImageResource(R.drawable.ic_bookmark)
-        else
-            save.setImageResource(R.drawable.ic_bookmark_filled)
     }
+
 }
