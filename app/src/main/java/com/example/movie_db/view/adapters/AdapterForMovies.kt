@@ -1,4 +1,4 @@
-package com.example.movie_db
+package com.example.movie_db.view.adapters
 
 import android.content.Context
 import android.content.Intent
@@ -12,6 +12,7 @@ import com.bumptech.glide.Glide
 import com.example.movie_db.view.activities.MovieInfoActivity
 import com.example.movie_db.model.data.movie.Movie
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.example.movie_db.R
 
 class AdapterForMovies(var context: Context, var movies: List<Movie>) :
     RecyclerView.Adapter<AdapterForMovies.MyViewHolder>() {

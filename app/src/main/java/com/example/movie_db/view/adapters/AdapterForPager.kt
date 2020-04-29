@@ -1,4 +1,4 @@
-package com.example.movie_db
+package com.example.movie_db.view.adapters
 
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager

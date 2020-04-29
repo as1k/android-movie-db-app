@@ -3,40 +3,29 @@ package com.example.movie_db.view.activities
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.View
-import android.widget.*
-import com.example.movie_db.R
-import com.example.movie_db.model.network.Retrofit
-import com.example.movie_db.BuildConfig
-import com.example.movie_db.model.data.authentication.TokenResponse
-import com.example.movie_db.model.data.authentication.UserResponse
-import com.example.movie_db.model.data.authentication.User
-import com.example.movie_db.model.data.authentication.LoginResponse
-import com.example.movie_db.model.data.authentication.SessionResponse
-import com.google.gson.Gson
-import com.google.gson.JsonObject
+import android.widget.Button
+import android.widget.EditText
 import android.widget.ProgressBar
-import kotlinx.coroutines.*
-import kotlin.coroutines.CoroutineContext
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import com.example.movie_db.R
+import com.example.movie_db.model.data.authentication.User
+import com.example.movie_db.model.data.authentication.UserResponse
+import com.example.movie_db.view_model.AuthVM
+import com.example.movie_db.view_model.VMProviderFactory
+import com.google.gson.Gson
 
-class SignInActivity : AppCompatActivity(), CoroutineScope {
+class SignInActivity : AppCompatActivity() {
 
     private lateinit var login: EditText
     private lateinit var password: EditText
     private lateinit var loginBtn: Button
     private lateinit var progressBar: ProgressBar
-    private val job = Job()
-
-    override val coroutineContext: CoroutineContext
-        get() = Dispatchers.Main + job
-
-    override fun onDestroy() {
-        super.onDestroy()
-        job.cancel()
-    }
+    private lateinit var authVM: AuthVM
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,45 +43,34 @@ class SignInActivity : AppCompatActivity(), CoroutineScope {
     }
 
     private fun setData() {
+
+        val viewModelProviderFactory = VMProviderFactory(this)
+        authVM = ViewModelProvider(this, viewModelProviderFactory)
+            .get(AuthVM::class.java)
+        authVM.liveData.observe(this, Observer { result ->
+            when (result) {
+                is AuthVM.State.ShowLoading -> {
+                    progressBar.visibility = View.VISIBLE
+                }
+                is AuthVM.State.HideLoading -> {
+                    progressBar.visibility = View.GONE
+                }
+                is AuthVM.State.Result -> {
+                    if (!result.isSuccess)
+                        noSuchUser()
+                }
+                is AuthVM.State.Account -> {
+                    loginSuccess(result.user, result.session)
+                }
+            }
+        })
+
         loginBtn.setOnClickListener {
-            onLoggingIn(
+            authVM.onLoggingIn(
                 login.text.toString(),
                 password.text.toString()
             )
             progressBar.visibility = View.VISIBLE
-        }
-    }
-
-    private fun onLoggingIn(login: String, password: String) {
-        launch {
-            withContext(Dispatchers.IO) {
-                try {
-                    val response =
-                        Retrofit.getPostApi().getTokenCoroutine(BuildConfig.MOVIE_DB_API_KEY)
-                    if (response.isSuccessful) {
-                        val token = Gson().fromJson(response.body(), TokenResponse::class.java)
-                        if (token != null) {
-                            Log.d("Done", "Token Created")
-                            val request = token.requestToken
-                            val body = JsonObject().apply {
-                                addProperty("username", login)
-                                addProperty("password", password)
-                                addProperty("request_token", request)
-                            }
-                            getLoginResponseCoroutine(body)
-                        } else {
-                            Log.e("Error", "Cannot create token")
-                        }
-                        progressBar.visibility = View.GONE
-                    } else {
-                        noSuchUser()
-                        Log.e("Error", "Cannot create token")
-                        progressBar.visibility = View.GONE
-                    }
-                } catch (e: Exception) {
-                    Log.e("Error", "Cannot create token")
-                }
-            }
         }
     }
 
@@ -116,83 +94,6 @@ class SignInActivity : AppCompatActivity(), CoroutineScope {
         val intent = Intent(this, MainActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
-    }
-
-    private fun getAccountCoroutine(session: String?) {
-        launch {
-            val response = Retrofit.getPostApi()
-                .getCurrentAccountCoroutine(BuildConfig.MOVIE_DB_API_KEY, session!!)
-            if (response.isSuccessful) {
-                val account = Gson().fromJson(response.body(), UserResponse::class.java)
-                if (account != null)
-                    loginSuccess(account, session)
-                progressBar.visibility = View.GONE
-            } else {
-                progressBar.visibility = View.GONE
-                noSuchUser()
-            }
-        }
-    }
-
-    private fun getSessionCoroutine(body: JsonObject) {
-        launch {
-            withContext(Dispatchers.IO) {
-                try {
-                    val response = Retrofit.getPostApi()
-                        .getSessionCoroutine(BuildConfig.MOVIE_DB_API_KEY, body)
-                    if (response.isSuccessful) {
-                        val session = Gson().fromJson(response.body(), SessionResponse::class.java)
-                        if (session != null) {
-                            val sessionId = session.sessionId
-                            getAccountCoroutine(sessionId)
-                        } else {
-                            Log.e("Error", "Cannot create session_id")
-                        }
-                        progressBar.visibility = View.GONE
-                    } else {
-                        Log.e("Error", "Cannot create session_id")
-                        progressBar.visibility = View.GONE
-                        noSuchUser()
-                    }
-                } catch (e: Exception) {
-                    Log.e("Error", "Cannot create session_id")
-                }
-            }
-        }
-    }
-
-    private fun getLoginResponseCoroutine(body: JsonObject) {
-        launch {
-            withContext(Dispatchers.IO) {
-                try {
-                    val response = Retrofit.getPostApi()
-                        .loginCoroutine(BuildConfig.MOVIE_DB_API_KEY, body)
-                    if (response.isSuccessful) {
-                        val loginResponse =
-                            Gson().fromJson(response.body(), LoginResponse::class.java)
-                        if (loginResponse != null) {
-                            Log.d("Done", "Token Created")
-                            val body = JsonObject().apply {
-                                addProperty(
-                                    "request_token",
-                                    loginResponse.requestToken.toString()
-                                )
-                            }
-                            getSessionCoroutine(body)
-                        }
-                        progressBar.visibility = View.GONE
-                    } else {
-                        progressBar.visibility = View.GONE
-                        noSuchUser()
-                    }
-                } catch (e: Exception) {
-                    Toast.makeText(
-                        this@SignInActivity,
-                        "Incorrect data", Toast.LENGTH_SHORT
-                    ).show()
-                }
-            }
-        }
     }
 
 }

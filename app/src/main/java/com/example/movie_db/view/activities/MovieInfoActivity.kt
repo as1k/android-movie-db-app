@@ -97,6 +97,7 @@ class MovieInfoActivity : AppCompatActivity() {
             } else {
                 Glide.with(this).load(R.drawable.ic_bookmark).into(save)
             }
+            movieInfoVM.likeMovie(!isSaved, movieId)
             movieInfoVM.isFavoriteMovie(movieId)
             movieInfoVM.getMovie(movieId)
             observe()

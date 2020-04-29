@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.example.movie_db.AdapterForMovies
+import com.example.movie_db.view.adapters.AdapterForMovies
 import com.example.movie_db.R
 import com.example.movie_db.model.data.movie.Movie
 import kotlin.collections.ArrayList

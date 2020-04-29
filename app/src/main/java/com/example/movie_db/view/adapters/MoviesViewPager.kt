@@ -1,4 +1,4 @@
-package com.example.movie_db
+package com.example.movie_db.view.adapters
 
 import android.annotation.SuppressLint
 import android.content.Context

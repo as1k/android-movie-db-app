@@ -4,8 +4,8 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.viewpager.widget.PagerAdapter
-import com.example.movie_db.MoviesViewPager
-import com.example.movie_db.AdapterForPager
+import com.example.movie_db.view.adapters.MoviesViewPager
+import com.example.movie_db.view.adapters.AdapterForPager
 import com.example.movie_db.R
 import com.example.movie_db.view.fragments.FragmentOne
 import com.example.movie_db.view.fragments.FragmentProfile
