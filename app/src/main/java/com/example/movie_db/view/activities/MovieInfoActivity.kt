@@ -54,38 +54,17 @@ class MovieInfoActivity : AppCompatActivity() {
         movieId = intent.getIntExtra("movie_id", 1)
         window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN
 
-        movieInfoVM.isFavoriteMovie(movieId)
-        movieInfoVM.getMovie(movieId)
-        fun observe() {
-            movieInfoVM.liveData.observe(this, Observer { result ->
-                when (result) {
-                    is MovieInfoVM.State.ShowLoading -> {
-                        swipeRefreshLayout.isRefreshing = true
-                    }
-                    is MovieInfoVM.State.HideLoading -> {
-                        swipeRefreshLayout.isRefreshing = false
-                    }
-                    is MovieInfoVM.State.Result -> {
-                        writeInViews(result.movie)
-                    }
-                    is MovieInfoVM.State.IsFavorite -> {
-                        isSaved = result.isFavorite
-                        if (isSaved) {
-                            Glide.with(this).load(R.drawable.ic_bookmark).into(save)
-                        } else {
-                            Glide.with(this).load(R.drawable.ic_bookmark_filled).into(save)
-                        }
-                    }
-                }
-            })
-        }
-        observe()
-
         back.setOnClickListener {
             onBackPressed()
         }
 
         swipeRefreshLayout.setOnRefreshListener {
+            movieInfoVM.isFavoriteMovie(movieId)
+            movieInfoVM.getMovie(movieId)
+            observe()
+        }
+
+        fun refresh() {
             movieInfoVM.isFavoriteMovie(movieId)
             movieInfoVM.getMovie(movieId)
             observe()
@@ -98,10 +77,36 @@ class MovieInfoActivity : AppCompatActivity() {
                 Glide.with(this).load(R.drawable.ic_bookmark).into(save)
             }
             movieInfoVM.likeMovie(!isSaved, movieId)
-            movieInfoVM.isFavoriteMovie(movieId)
-            movieInfoVM.getMovie(movieId)
-            observe()
+            refresh()
         }
+
+        movieInfoVM.isFavoriteMovie(movieId)
+        movieInfoVM.getMovie(movieId)
+        observe()
+    }
+
+    fun observe() {
+        movieInfoVM.liveData.observe(this, Observer { result ->
+            when (result) {
+                is MovieInfoVM.State.ShowLoading -> {
+                    swipeRefreshLayout.isRefreshing = true
+                }
+                is MovieInfoVM.State.HideLoading -> {
+                    swipeRefreshLayout.isRefreshing = false
+                }
+                is MovieInfoVM.State.Result -> {
+                    writeInViews(result.movie)
+                }
+                is MovieInfoVM.State.IsFavorite -> {
+                    isSaved = result.isFavorite
+                    if (isSaved) {
+                        Glide.with(this).load(R.drawable.ic_bookmark).into(save)
+                    } else {
+                        Glide.with(this).load(R.drawable.ic_bookmark_filled).into(save)
+                    }
+                }
+            }
+        })
     }
 
     fun writeInViews(movie: Movie) {
