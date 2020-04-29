@@ -7,6 +7,7 @@ import android.view.MotionEvent
 import androidx.viewpager.widget.ViewPager
 
 class MoviesViewPager : ViewPager {
+
     private var canSwipeDown = false
 
     constructor(context: Context?) : super(context!!)
