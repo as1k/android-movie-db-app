@@ -5,11 +5,15 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import com.example.movie_db.BuildConfig
 import com.example.movie_db.R
 import com.example.movie_db.model.network.Retrofit
 import com.example.movie_db.model.data.authentication.UserResponse
 import com.example.movie_db.model.data.authentication.User
+import com.example.movie_db.view_model.AuthViewModel
+import com.example.movie_db.view_model.ViewModelProviderFactory
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.CoroutineScope
@@ -20,29 +24,46 @@ import java.lang.Exception
 import java.lang.reflect.Type
 import kotlin.coroutines.CoroutineContext
 
-class Activator : AppCompatActivity(), CoroutineScope {
-
-    private val job = Job()
-
-    override val coroutineContext: CoroutineContext
-        get() = Dispatchers.Main + job
-
-    override fun onDestroy() {
-        super.onDestroy()
-        job.cancel()
-    }
+class Activator : AppCompatActivity() {
+    private lateinit var authViewModel: AuthViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.sign_up_activity)
+        val viewModelProviderFactory = ViewModelProviderFactory(this)
+
+        authViewModel = ViewModelProvider(this, viewModelProviderFactory)
+            .get(AuthViewModel::class.java)
+        authViewModel.liveData.observe(this, Observer { result ->
+            when (result) {
+                is AuthViewModel.State.Result -> {
+                    if (!result.isSuccess) {
+                        val intent = Intent(this@Activator, SignInActivity::class.java)
+                        intent.flags =
+                            Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        startActivity(intent)
+                    }
+                }
+                is AuthViewModel.State.Account -> {
+                    loginSuccess(result.user, result.session)
+                }
+            }
+        })
+
         val savedUser: SharedPreferences =
             this.getSharedPreferences("current_user", Context.MODE_PRIVATE)
         val user = savedUser.getString("current_user", null)
-        val type: Type = object : TypeToken<UserResponse>() {}.type
-        User.user = Gson().fromJson<UserResponse>(user, type)
-        if (User.user != null && User.user!!.sessionId != null)
-            getAccountCoroutine(User.user!!.sessionId.toString())
-        else {
+        if (user != null) {
+            val type: Type = object : TypeToken<UserResponse>() {}.type
+            User.user = Gson().fromJson<UserResponse>(user, type)
+            if (User.user!!.sessionId != null) {
+                authViewModel.getAccount(User.user!!.sessionId.toString())
+                val intent = Intent(this, MainActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                startActivity(intent)
+            }
+
+        } else {
             val intent = Intent(this, SignInActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(intent)
@@ -65,31 +86,5 @@ class Activator : AppCompatActivity(), CoroutineScope {
         val intent = Intent(this, MainActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
-    }
-
-    private fun getAccountCoroutine(session: String) {
-        launch {
-            try {
-                val response = Retrofit.getPostApi()
-                    .getCurrentAccountCoroutine(BuildConfig.MOVIE_DB_API_KEY, session)
-                if (response.isSuccessful) {
-                    val account = Gson().fromJson(response.body(), UserResponse::class.java)
-                    if (account != null)
-                        loginSuccess(account, session)
-                    else {
-                        User.user = null
-                        val intent = Intent(this@Activator, SignInActivity::class.java)
-                        intent.flags =
-                            Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                        startActivity(intent)
-                    }
-                }
-            } catch (e: Exception) {
-                val intent = Intent(this@Activator, MainActivity::class.java)
-                intent.flags =
-                    Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                startActivity(intent)
-            }
-        }
     }
 }
