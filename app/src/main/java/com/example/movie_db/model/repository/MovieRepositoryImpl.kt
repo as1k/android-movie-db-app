@@ -37,8 +37,8 @@ class MovieRepositoryImpl(
     override suspend fun getMoviesCoroutine(apiKey: String): List<Movie>? =
         movieApi.getPostApi().getMoviesCoroutine(apiKey).await().body()?.getResults()
 
-//    override suspend fun getMovieCoroutine(movieId: Int, apiKey: String): JsonObject? =
-//        movieApi.getPostApi().getMovieCoroutine(movieId, apiKey).await().body()
+    override suspend fun getMovieCoroutine(movieId: Int, apiKey: String): JsonObject? =
+        movieApi.getPostApi().getMovieCoroutine(movieId, apiKey).await().body()
 
     override suspend fun getSavedMoviesCoroutine(
         accountId: Int,
@@ -50,6 +50,6 @@ class MovieRepositoryImpl(
     override suspend fun addRemoveSavedCoroutine(accountId: Int?, apiKey: String, sessionId: String?, body: JsonObject): JsonObject? =
         movieApi.getPostApi().addRemoveSavedCoroutine(accountId, apiKey, sessionId, body).await().body()
 
-//    override suspend fun isSavedCoroutine(movieId: Int?, apiKey: String, sessionId: String?): JsonObject? =
-//        movieApi.getPostApi().isSavedCoroutine(movieId, apiKey, sessionId).await().body()
+    override suspend fun isSavedCoroutine(movieId: Int?, apiKey: String, sessionId: String?): JsonObject? =
+        movieApi.getPostApi().isSavedCoroutine(movieId, apiKey, sessionId).await().body()
 }

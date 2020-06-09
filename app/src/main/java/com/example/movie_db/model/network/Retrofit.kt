@@ -21,17 +21,17 @@ object Retrofit {
 }
 
 interface PostApi {
-
+    //user
     @GET("authentication/token/new")
     suspend fun getTokenCoroutine(
         @Query("api_key") apiKey: String
-    ): Response<JsonObject>
+    ): Deferred<Response<JsonObject>>
 
     @POST("authentication/token/validate_with_login")
     suspend fun loginCoroutine(
         @Query("api_key") apiKey: String,
         @Body body: JsonObject
-    ): Response<JsonObject>
+    ): Deferred<Response<JsonObject>>
 
     @GET("account")
     suspend fun getCurrentAccountCoroutine(
@@ -49,7 +49,7 @@ interface PostApi {
     suspend fun getMovieCoroutine(
         @Path("movie_id") movieId: Int,
         @Query("api_key") apiKey: String
-    ): Response<JsonObject>
+    ): Deferred<Response<JsonObject>>
 
     @GET("account/{account_id}/favorite/movies")
     suspend fun getSavedMoviesCoroutine(
@@ -71,7 +71,7 @@ interface PostApi {
         @Path("movie_id") movieId: Int?,
         @Query("api_key") apiKey: String,
         @Query("session_id") sessionId: String?
-    ): Response<JsonObject>
+    ): Deferred<Response<JsonObject>>
 
     @POST("authentication/session/new")
     suspend fun getSessionCoroutine(

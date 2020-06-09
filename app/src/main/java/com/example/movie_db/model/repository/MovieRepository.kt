@@ -12,8 +12,8 @@ interface MovieRepository {
     fun insertMovieInfoDB(movie: Movie)
 
     suspend fun getMoviesCoroutine(apiKey: String) : List<Movie>?
-//    suspend fun getMovieCoroutine(movieId: Int, apiKey: String): JsonObject?
+    suspend fun getMovieCoroutine(movieId: Int, apiKey: String): JsonObject?
     suspend fun getSavedMoviesCoroutine(accountId: Int, apiKey: String, sessionId: String): List<Movie>?
     suspend fun addRemoveSavedCoroutine(accountId: Int?, apiKey: String, sessionId: String?, body: JsonObject): JsonObject?
-//    suspend fun isSavedCoroutine(movieId: Int?, apiKey: String, sessionId: String?): JsonObject?
+    suspend fun isSavedCoroutine(movieId: Int?, apiKey: String, sessionId: String?): JsonObject?
 }
