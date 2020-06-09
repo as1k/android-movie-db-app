@@ -32,7 +32,6 @@ class MovieRepositoryImpl(
         return movieDao.insertMovieInfo(movie)
     }
 
-    ////////////////////
 
     override suspend fun getMoviesCoroutine(apiKey: String): List<Movie>? =
         movieApi.getPostApi().getMoviesCoroutine(apiKey).await().body()?.getResults()

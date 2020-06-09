@@ -37,7 +37,7 @@ interface PostApi {
     suspend fun getCurrentAccountCoroutine(
         @Query("api_key") apiKey: String,
         @Query("session_id") sessionId: String
-    ): Response<JsonObject>
+    ): Deferred<Response<JsonObject>>
 
     // movie
     @GET("movie/popular")
@@ -77,7 +77,7 @@ interface PostApi {
     suspend fun getSessionCoroutine(
         @Query("api_key") apiKey: String,
         @Body body: JsonObject
-    ): Response<JsonObject>
+    ): Deferred<Response<JsonObject>>
 
     @HTTP(
         method = "DELETE",
