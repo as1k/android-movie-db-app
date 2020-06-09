@@ -6,8 +6,6 @@ import androidx.lifecycle.ViewModel
 import com.example.movie_db.BuildConfig
 import com.example.movie_db.model.data.movie.Movie
 import com.example.movie_db.model.data.authentication.User
-import com.example.movie_db.model.database.MovieDao
-import com.example.movie_db.model.database.MovieDatabase
 import com.example.movie_db.model.network.Retrofit
 import com.example.movie_db.model.repository.MovieRepository
 import com.example.movie_db.model.repository.MovieRepositoryImpl
@@ -17,13 +15,16 @@ import kotlinx.coroutines.*
 import java.lang.Exception
 import kotlin.coroutines.CoroutineContext
 
-class MoviesViewModel(context: Context) : ViewModel(), CoroutineScope {
+class MoviesViewModel(
+    private val context: Context,
+    private var movieRepository: MovieRepository
+) : ViewModel(), CoroutineScope {
 
     private val job = Job()
     val liveData = MutableLiveData<State>()
 
-    private val movieDao: MovieDao = MovieDatabase.getDatabase(context = context).movieDao()
-    private val movieRepository: MovieRepository? = MovieRepositoryImpl(Retrofit, movieDao)
+//    private val movieDao: MovieDao = MovieDatabase.getDatabase(context = context).movieDao()
+//    private val movieRepository: MovieRepository? = MovieRepositoryImpl(Retrofit, movieDao)
 
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job

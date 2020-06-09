@@ -10,6 +10,10 @@ import com.example.movie_db.model.data.movie.Movie
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import com.example.movie_db.model.database.MovieDao
+import com.example.movie_db.model.database.MovieDatabase
+import com.example.movie_db.model.network.Retrofit
+import com.example.movie_db.model.repository.MovieRepositoryImpl
 import com.example.movie_db.view_model.MovieInfoViewModel
 import com.example.movie_db.view_model.ViewModelProviderFactory
 
@@ -37,9 +41,8 @@ class MovieInfoActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.movie_info_activity)
 
-        val vmProviderFactory = ViewModelProviderFactory(this)
-        movieInfoViewModel = ViewModelProvider(this, vmProviderFactory)
-            .get(MovieInfoViewModel::class.java)
+        val movieDao: MovieDao = MovieDatabase.getDatabase(this).movieDao()
+        movieInfoViewModel = MovieInfoViewModel(MovieRepositoryImpl(Retrofit, movieDao))
 
         swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout)
         title = findViewById(R.id.title)

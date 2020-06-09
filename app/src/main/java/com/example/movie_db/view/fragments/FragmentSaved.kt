@@ -16,6 +16,10 @@ import com.example.movie_db.R
 import com.example.movie_db.model.data.movie.Movie
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import com.example.movie_db.model.database.MovieDao
+import com.example.movie_db.model.database.MovieDatabase
+import com.example.movie_db.model.network.Retrofit
+import com.example.movie_db.model.repository.MovieRepositoryImpl
 import com.example.movie_db.view_model.MoviesViewModel
 import com.example.movie_db.view_model.ViewModelProviderFactory
 
@@ -52,9 +56,9 @@ class FragmentSaved : Fragment() {
         toolbar = rootView.findViewById(R.id.toolbar)
         toolbar.text = "Favorites"
 
-        val vmProviderFactory = ViewModelProviderFactory(this.context!!)
-        moviesViewModel = ViewModelProvider(this, vmProviderFactory)
-            .get(MoviesViewModel::class.java)
+        val movieDao: MovieDao = MovieDatabase.getDatabase(requireContext()).movieDao()
+        val movieRepository = MovieRepositoryImpl(Retrofit, movieDao)
+        moviesViewModel = MoviesViewModel(requireContext(), movieRepository)
 
         swipeRefreshLayout = rootView.findViewById(R.id.main_content)
         swipeRefreshLayout.setOnRefreshListener {

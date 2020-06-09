@@ -17,6 +17,10 @@ import com.example.movie_db.model.data.movie.Movie
 import kotlin.collections.ArrayList
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import com.example.movie_db.model.database.MovieDao
+import com.example.movie_db.model.database.MovieDatabase
+import com.example.movie_db.model.network.Retrofit
+import com.example.movie_db.model.repository.MovieRepositoryImpl
 import com.example.movie_db.view_model.MoviesViewModel
 import com.example.movie_db.view_model.ViewModelProviderFactory
 
@@ -54,9 +58,9 @@ class FragmentOne : Fragment() {
         recView = view.findViewById(R.id.recycler_view)
         swipeRefreshLayout = view.findViewById(R.id.main_content)
 
-        val viewModelProviderFactory = ViewModelProviderFactory(this.context!!)
-        moviesViewModel =
-            ViewModelProvider(this, viewModelProviderFactory).get(MoviesViewModel::class.java)
+        val movieDao: MovieDao = MovieDatabase.getDatabase(requireContext()).movieDao()
+        val movieRepository = MovieRepositoryImpl(Retrofit, movieDao)
+        moviesViewModel = MoviesViewModel(requireContext(), movieRepository)
     }
 
     private fun setAdapter() {
