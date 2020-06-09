@@ -20,7 +20,7 @@ import kotlinx.coroutines.launch
 import java.lang.Exception
 import kotlin.coroutines.CoroutineContext
 
-class MovieInfoVM(context: Context) : ViewModel(), CoroutineScope {
+class MovieInfoViewModel(context: Context) : ViewModel(), CoroutineScope {
     private val job = Job()
     var liveData = MutableLiveData<State>()
     private val movieDao: MovieDao = MovieDatabase.getDatabase(context).movieDao()

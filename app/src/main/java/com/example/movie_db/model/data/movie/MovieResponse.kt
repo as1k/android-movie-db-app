@@ -8,7 +8,7 @@ class MovieResponse {
     @SerializedName("results")
     private val results: List<Movie>? = null
 
-    fun getResults(): List<Movie?>? {
+    fun getResults(): List<Movie>? {
         return results
     }
 }

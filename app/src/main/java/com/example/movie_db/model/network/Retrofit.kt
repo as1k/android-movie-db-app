@@ -7,6 +7,7 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.*
+import kotlinx.coroutines.Deferred
 
 object Retrofit {
 
@@ -38,10 +39,11 @@ interface PostApi {
         @Query("session_id") sessionId: String
     ): Response<JsonObject>
 
+    // movie
     @GET("movie/popular")
     suspend fun getMoviesCoroutine(
         @Query("api_key") apiKey: String
-    ): Response<MovieResponse>
+    ): Deferred<Response<MovieResponse>>
 
     @GET("movie/{movie_id}")
     suspend fun getMovieCoroutine(
@@ -54,7 +56,7 @@ interface PostApi {
         @Path("account_id") id: Int,
         @Query("api_key") apiKey: String,
         @Query("session_id") sessionId: String
-    ): Response<MovieResponse>
+    ): Deferred<Response<MovieResponse>>
 
     @POST("account/{account_id}/favorite")
     suspend fun addRemoveSavedCoroutine(
@@ -62,7 +64,7 @@ interface PostApi {
         @Query("api_key") apiKey: String,
         @Query("session_id") sessionId: String?,
         @Body body: JsonObject
-    ): Response<JsonObject>
+    ): Deferred<Response<JsonObject>>
 
     @GET("movie/{movie_id}/account_states")
     suspend fun isSavedCoroutine(

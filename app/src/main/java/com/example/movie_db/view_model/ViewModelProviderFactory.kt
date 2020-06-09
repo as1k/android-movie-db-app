@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModel
 import android.content.Context
 
-class VMProviderFactory(private val context: Context) : ViewModelProvider.Factory {
+class ViewModelProviderFactory(private val context: Context) : ViewModelProvider.Factory {
 
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
         return modelClass.getConstructor(Context::class.java).newInstance(context)

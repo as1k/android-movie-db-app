@@ -17,7 +17,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 
-class AuthVM(context: Context) : ViewModel(), CoroutineScope {
+class AuthViewModel(context: Context) : ViewModel(), CoroutineScope {
     private val job = Job()
     var liveData = MutableLiveData<State>()
 

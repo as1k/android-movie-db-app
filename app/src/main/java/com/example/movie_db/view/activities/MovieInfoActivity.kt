@@ -10,8 +10,8 @@ import com.example.movie_db.model.data.movie.Movie
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import com.example.movie_db.view_model.MovieInfoVM
-import com.example.movie_db.view_model.VMProviderFactory
+import com.example.movie_db.view_model.MovieInfoViewModel
+import com.example.movie_db.view_model.ViewModelProviderFactory
 
 class MovieInfoActivity : AppCompatActivity() {
 
@@ -27,7 +27,7 @@ class MovieInfoActivity : AppCompatActivity() {
     private lateinit var save: ImageButton
     private var isSaved: Boolean = false
     private var movieId: Int = 1
-    private lateinit var movieInfoVM: MovieInfoVM
+    private lateinit var movieInfoViewModel: MovieInfoViewModel
 
     companion object {
         var notSynced: Boolean = false
@@ -37,9 +37,9 @@ class MovieInfoActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.movie_info_activity)
 
-        val vmProviderFactory = VMProviderFactory(this)
-        movieInfoVM = ViewModelProvider(this, vmProviderFactory)
-            .get(MovieInfoVM::class.java)
+        val vmProviderFactory = ViewModelProviderFactory(this)
+        movieInfoViewModel = ViewModelProvider(this, vmProviderFactory)
+            .get(MovieInfoViewModel::class.java)
 
         swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout)
         title = findViewById(R.id.title)
@@ -59,14 +59,14 @@ class MovieInfoActivity : AppCompatActivity() {
         }
 
         swipeRefreshLayout.setOnRefreshListener {
-            movieInfoVM.isFavoriteMovie(movieId)
-            movieInfoVM.getMovie(movieId)
+            movieInfoViewModel.isFavoriteMovie(movieId)
+            movieInfoViewModel.getMovie(movieId)
             observe()
         }
 
         fun refresh() {
-            movieInfoVM.isFavoriteMovie(movieId)
-            movieInfoVM.getMovie(movieId)
+            movieInfoViewModel.isFavoriteMovie(movieId)
+            movieInfoViewModel.getMovie(movieId)
             observe()
         }
 
@@ -76,28 +76,28 @@ class MovieInfoActivity : AppCompatActivity() {
             } else {
                 Glide.with(this).load(R.drawable.ic_bookmark).into(save)
             }
-            movieInfoVM.likeMovie(!isSaved, movieId)
+            movieInfoViewModel.likeMovie(!isSaved, movieId)
             refresh()
         }
 
-        movieInfoVM.isFavoriteMovie(movieId)
-        movieInfoVM.getMovie(movieId)
+        movieInfoViewModel.isFavoriteMovie(movieId)
+        movieInfoViewModel.getMovie(movieId)
         observe()
     }
 
     fun observe() {
-        movieInfoVM.liveData.observe(this, Observer { result ->
+        movieInfoViewModel.liveData.observe(this, Observer { result ->
             when (result) {
-                is MovieInfoVM.State.ShowLoading -> {
+                is MovieInfoViewModel.State.ShowLoading -> {
                     swipeRefreshLayout.isRefreshing = true
                 }
-                is MovieInfoVM.State.HideLoading -> {
+                is MovieInfoViewModel.State.HideLoading -> {
                     swipeRefreshLayout.isRefreshing = false
                 }
-                is MovieInfoVM.State.Result -> {
+                is MovieInfoViewModel.State.Result -> {
                     writeInViews(result.movie)
                 }
-                is MovieInfoVM.State.IsFavorite -> {
+                is MovieInfoViewModel.State.IsFavorite -> {
                     isSaved = result.isFavorite
                     if (isSaved) {
                         Glide.with(this).load(R.drawable.ic_bookmark).into(save)

@@ -17,8 +17,8 @@ import com.example.movie_db.model.data.movie.Movie
 import kotlin.collections.ArrayList
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import com.example.movie_db.view_model.MoviesVM
-import com.example.movie_db.view_model.VMProviderFactory
+import com.example.movie_db.view_model.MoviesViewModel
+import com.example.movie_db.view_model.ViewModelProviderFactory
 
 class FragmentOne : Fragment() {
 
@@ -27,7 +27,7 @@ class FragmentOne : Fragment() {
     private lateinit var recView: RecyclerView
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
     private lateinit var toolbar: TextView
-    private lateinit var moviesVM: MoviesVM
+    private lateinit var moviesViewModel: MoviesViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -54,28 +54,28 @@ class FragmentOne : Fragment() {
         recView = view.findViewById(R.id.recycler_view)
         swipeRefreshLayout = view.findViewById(R.id.main_content)
 
-        val viewModelProviderFactory = VMProviderFactory(this.context!!)
-        moviesVM =
-            ViewModelProvider(this, viewModelProviderFactory).get(MoviesVM::class.java)
+        val viewModelProviderFactory = ViewModelProviderFactory(this.context!!)
+        moviesViewModel =
+            ViewModelProvider(this, viewModelProviderFactory).get(MoviesViewModel::class.java)
     }
 
     private fun setAdapter() {
         recView.layoutManager = LinearLayoutManager(activity)
         swipeRefreshLayout.setOnRefreshListener {
             viewsOnInit()
-            moviesVM.getMovies()
+            moviesViewModel.getMovies()
         }
-        moviesVM.getMovies()
+        moviesViewModel.getMovies()
 
-        moviesVM.liveData.observe(this, Observer { result ->
+        moviesViewModel.liveData.observe(this, Observer { result ->
             when (result) {
-                is MoviesVM.State.ShowLoading -> {
+                is MoviesViewModel.State.ShowLoading -> {
                     swipeRefreshLayout.isRefreshing = true
                 }
-                is MoviesVM.State.HideLoading -> {
+                is MoviesViewModel.State.HideLoading -> {
                     swipeRefreshLayout.isRefreshing = false
                 }
-                is MoviesVM.State.Result -> {
+                is MoviesViewModel.State.Result -> {
                     adapter.movies = result.list
                     adapter.notifyDataSetChanged()
                 }
