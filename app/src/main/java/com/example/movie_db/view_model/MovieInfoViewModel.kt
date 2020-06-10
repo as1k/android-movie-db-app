@@ -10,6 +10,8 @@ import com.example.movie_db.model.data.movie.SavingResponse
 import com.example.movie_db.model.database.MovieDao
 import com.example.movie_db.model.database.MovieDatabase
 import com.example.movie_db.model.network.Retrofit
+import com.example.movie_db.model.repository.MovieRepository
+import com.example.movie_db.model.repository.MovieRepositoryImpl
 import com.example.movie_db.view.activities.MovieInfoActivity
 import com.google.gson.Gson
 import com.google.gson.JsonObject
@@ -20,10 +22,9 @@ import kotlinx.coroutines.launch
 import java.lang.Exception
 import kotlin.coroutines.CoroutineContext
 
-class MovieInfoVM(context: Context) : ViewModel(), CoroutineScope {
+class MovieInfoViewModel(private val movieRepository: MovieRepository) : ViewModel(), CoroutineScope {
     private val job = Job()
     var liveData = MutableLiveData<State>()
-    private val movieDao: MovieDao = MovieDatabase.getDatabase(context).movieDao()
 
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job
@@ -38,18 +39,18 @@ class MovieInfoVM(context: Context) : ViewModel(), CoroutineScope {
             liveData.value = State.ShowLoading
             var movie: Movie
             try {
-                val response = Retrofit.getPostApi()
+                val movieInfo = movieRepository
                     .getMovieCoroutine(movieId, BuildConfig.MOVIE_DB_API_KEY)
-                if (response.isSuccessful) {
-                    val result = Gson().fromJson(response.body(), Movie::class.java)
+                if (movieInfo != null) {
+                    val result = Gson().fromJson(movieInfo, Movie::class.java)
                     movie = result
                 } else {
-                    movieDao.getMovieInfo(movieId)
-                    movie = movieDao.getMovieInfo(movieId)
+                    movieRepository.getMovieInfoDB(movieId)
+                    movie = movieRepository?.getMovieInfoDB(movieId)
                 }
             } catch (e: Exception) {
-                movieDao.getMovieInfo(movieId)
-                movie = movieDao.getMovieInfo(movieId)
+                movieRepository.getMovieInfoDB(movieId)
+                movie = movieRepository.getMovieInfoDB(movieId)
             }
             liveData.value = State.HideLoading
             liveData.value = State.Result(movie)
@@ -64,19 +65,19 @@ class MovieInfoVM(context: Context) : ViewModel(), CoroutineScope {
                     addProperty("media_id", movieId)
                     addProperty("favorite", isFavorite)
                 }
-                Retrofit.getPostApi().addRemoveSavedCoroutine(
+                movieRepository.addRemoveSavedCoroutine(
                     User.user?.userId,
                     BuildConfig.MOVIE_DB_API_KEY,
                     User.user?.sessionId,
                     body
                 )
-                val movie = movieDao.getMovieInfo(movieId)
+                val movie = movieRepository.getMovieInfoDB(movieId)
                 movie.isSaved = !movie.isSaved
-                movieDao.insertMovieInfo(movie)
+                movieRepository.insertMovieInfoDB(movie)
             } catch (e: Exception) {
-                val movie = movieDao.getMovieInfo(movieId)
+                val movie = movieRepository.getMovieInfoDB(movieId)
                 movie.isSaved = !movie.isSaved
-                movieDao.insertMovieInfo(movie)
+                movieRepository.insertMovieInfoDB(movie)
                 MovieInfoActivity.notSynced = true
             }
         }
@@ -85,20 +86,20 @@ class MovieInfoVM(context: Context) : ViewModel(), CoroutineScope {
     fun isFavoriteMovie(movieId: Int) {
         launch {
             try {
-                val response = Retrofit.getPostApi().isSavedCoroutine(
+                val isSavedMovie = movieRepository.isSavedCoroutine(
                     movieId,
                     BuildConfig.MOVIE_DB_API_KEY,
                     User.user?.sessionId
                 )
-                if (response.isSuccessful) {
+                if (isSavedMovie != null) {
                     val like = Gson().fromJson(
-                        response.body(),
+                        isSavedMovie,
                         SavingResponse::class.java
                     ).favorite
                     liveData.value = State.IsFavorite(like)
                 }
             } catch (e: Exception) {
-                val movie = movieDao.getMovieInfo(movieId)
+                val movie = movieRepository.getMovieInfoDB(movieId)
                 liveData.value = State.IsFavorite(movie.isSaved)
             }
         }

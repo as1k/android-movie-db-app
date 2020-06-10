@@ -15,17 +15,21 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.movie_db.R
 import com.example.movie_db.model.data.authentication.User
 import com.example.movie_db.model.data.authentication.UserResponse
-import com.example.movie_db.view_model.AuthVM
-import com.example.movie_db.view_model.VMProviderFactory
+import com.example.movie_db.model.network.Retrofit
+import com.example.movie_db.model.repository.UserRepository
+import com.example.movie_db.model.repository.UserRepositoryImpl
+import com.example.movie_db.view_model.AuthViewModel
+import com.example.movie_db.view_model.ViewModelProviderFactory
 import com.google.gson.Gson
 
 class SignInActivity : AppCompatActivity() {
 
+    private lateinit var userRepository: UserRepository
     private lateinit var login: EditText
     private lateinit var password: EditText
     private lateinit var loginBtn: Button
     private lateinit var progressBar: ProgressBar
-    private lateinit var authVM: AuthVM
+    private lateinit var authViewModel: AuthViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,29 +48,29 @@ class SignInActivity : AppCompatActivity() {
 
     private fun setData() {
 
-        val viewModelProviderFactory = VMProviderFactory(this)
-        authVM = ViewModelProvider(this, viewModelProviderFactory)
-            .get(AuthVM::class.java)
-        authVM.liveData.observe(this, Observer { result ->
+        val viewModelProviderFactory = ViewModelProviderFactory(this)
+        userRepository = UserRepositoryImpl(Retrofit)
+        authViewModel = AuthViewModel(this, userRepository)
+        authViewModel.liveData.observe(this, Observer { result ->
             when (result) {
-                is AuthVM.State.ShowLoading -> {
+                is AuthViewModel.State.ShowLoading -> {
                     progressBar.visibility = View.VISIBLE
                 }
-                is AuthVM.State.HideLoading -> {
+                is AuthViewModel.State.HideLoading -> {
                     progressBar.visibility = View.GONE
                 }
-                is AuthVM.State.Result -> {
+                is AuthViewModel.State.Result -> {
                     if (!result.isSuccess)
                         noSuchUser()
                 }
-                is AuthVM.State.Account -> {
+                is AuthViewModel.State.Account -> {
                     loginSuccess(result.user, result.session)
                 }
             }
         })
 
         loginBtn.setOnClickListener {
-            authVM.onLoggingIn(
+            authViewModel.onLoggingIn(
                 login.text.toString(),
                 password.text.toString()
             )

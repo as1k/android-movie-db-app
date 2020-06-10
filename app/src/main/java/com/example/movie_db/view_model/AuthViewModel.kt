@@ -9,6 +9,7 @@ import com.example.movie_db.model.data.authentication.SessionResponse
 import com.example.movie_db.model.data.authentication.TokenResponse
 import com.example.movie_db.model.data.authentication.UserResponse
 import com.example.movie_db.model.network.Retrofit
+import com.example.movie_db.model.repository.UserRepository
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import kotlinx.coroutines.CoroutineScope
@@ -16,8 +17,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
+import com.example.movie_db.model.repository.UserRepositoryImpl
 
-class AuthVM(context: Context) : ViewModel(), CoroutineScope {
+class AuthViewModel(private val context: Context, private var userRepository: UserRepository? = null) : ViewModel(), CoroutineScope {
+
     private val job = Job()
     var liveData = MutableLiveData<State>()
 
@@ -32,11 +35,10 @@ class AuthVM(context: Context) : ViewModel(), CoroutineScope {
     fun onLoggingIn(login: String, password: String) {
         launch {
             liveData.value = State.ShowLoading
-            val response =
-                Retrofit.getPostApi()
-                    .getTokenCoroutine(BuildConfig.MOVIE_DB_API_KEY)
-            if (response.isSuccessful) {
-                val token = Gson().fromJson(response.body(), TokenResponse::class.java)
+            val token = userRepository
+                    ?.getTokenCoroutine(BuildConfig.MOVIE_DB_API_KEY)
+            try {
+                val token = Gson().fromJson(token, TokenResponse::class.java)
                 if (token != null) {
                     val request = token.requestToken
                     val body = JsonObject().apply {
@@ -46,7 +48,7 @@ class AuthVM(context: Context) : ViewModel(), CoroutineScope {
                     }
                     getLoginResponse(body)
                 }
-            } else {
+            } catch (e: Exception) {
                 liveData.value = State.Result(false)
             }
         }
@@ -54,10 +56,11 @@ class AuthVM(context: Context) : ViewModel(), CoroutineScope {
 
     private fun getLoginResponse(body: JsonObject) {
         launch {
-            val response = Retrofit.getPostApi()
-                .loginCoroutine(BuildConfig.MOVIE_DB_API_KEY, body)
-            if (response.isSuccessful) {
-                val loginResponse = Gson().fromJson(response.body(), LoginResponse::class.java)
+            try {
+                val response = userRepository
+                    ?.loginCoroutine(BuildConfig.MOVIE_DB_API_KEY, body)
+
+                val loginResponse = Gson().fromJson(response, LoginResponse::class.java)
                 if (loginResponse != null) {
                     val body = JsonObject().apply {
                         addProperty(
@@ -67,7 +70,7 @@ class AuthVM(context: Context) : ViewModel(), CoroutineScope {
                     }
                     getSession(body)
                 }
-            } else {
+            } catch (e: Exception) {
                 liveData.value = State.Result(false)
             }
         }
@@ -75,15 +78,15 @@ class AuthVM(context: Context) : ViewModel(), CoroutineScope {
 
     private fun getSession(body: JsonObject) {
         launch {
-            val response = Retrofit.getPostApi()
-                .getSessionCoroutine(BuildConfig.MOVIE_DB_API_KEY, body)
-            if (response.isSuccessful) {
-                val session = Gson().fromJson(response.body(), SessionResponse::class.java)
+            try {
+                val response = userRepository
+                    ?.getSessionCoroutine(BuildConfig.MOVIE_DB_API_KEY, body)
+                val session = Gson().fromJson(response, SessionResponse::class.java)
                 if (session != null) {
                     val sessionId = session.sessionId
                     getAccount(sessionId)
                 }
-            } else {
+            } catch (e: Exception) {
                 liveData.value = State.Result(false)
             }
         }
@@ -91,13 +94,13 @@ class AuthVM(context: Context) : ViewModel(), CoroutineScope {
 
     fun getAccount(session: String) {
         launch {
-            val response = Retrofit.getPostApi()
-                .getCurrentAccountCoroutine(BuildConfig.MOVIE_DB_API_KEY, session)
-            if (response.isSuccessful) {
-                val account = Gson().fromJson(response.body(), UserResponse::class.java)
+            try {
+                val response = userRepository
+                    ?.getCurrentAccountCoroutine(BuildConfig.MOVIE_DB_API_KEY, session)
+                val account = Gson().fromJson(response, UserResponse::class.java)
                 if (account != null)
                     liveData.value = State.Account(account, session)
-            } else {
+            } catch (e: Exception) {
                 liveData.value = State.Result(false)
             }
             liveData.value = State.HideLoading

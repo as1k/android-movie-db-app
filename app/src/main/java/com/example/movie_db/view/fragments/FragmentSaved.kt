@@ -16,8 +16,12 @@ import com.example.movie_db.R
 import com.example.movie_db.model.data.movie.Movie
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import com.example.movie_db.view_model.MoviesVM
-import com.example.movie_db.view_model.VMProviderFactory
+import com.example.movie_db.model.database.MovieDao
+import com.example.movie_db.model.database.MovieDatabase
+import com.example.movie_db.model.network.Retrofit
+import com.example.movie_db.model.repository.MovieRepositoryImpl
+import com.example.movie_db.view_model.MoviesViewModel
+import com.example.movie_db.view_model.ViewModelProviderFactory
 
 
 class FragmentSaved : Fragment() {
@@ -27,7 +31,7 @@ class FragmentSaved : Fragment() {
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
     private lateinit var movies: List<Movie>
     private lateinit var toolbar: TextView
-    private lateinit var moviesVM: MoviesVM
+    private lateinit var moviesViewModel: MoviesViewModel
 
     override fun onResume() {
         super.onResume()
@@ -52,14 +56,14 @@ class FragmentSaved : Fragment() {
         toolbar = rootView.findViewById(R.id.toolbar)
         toolbar.text = "Favorites"
 
-        val vmProviderFactory = VMProviderFactory(this.context!!)
-        moviesVM = ViewModelProvider(this, vmProviderFactory)
-            .get(MoviesVM::class.java)
+        val movieDao: MovieDao = MovieDatabase.getDatabase(requireContext()).movieDao()
+        val movieRepository = MovieRepositoryImpl(Retrofit, movieDao)
+        moviesViewModel = MoviesViewModel(requireContext(), movieRepository)
 
         swipeRefreshLayout = rootView.findViewById(R.id.main_content)
         swipeRefreshLayout.setOnRefreshListener {
             viewsOnInit()
-            moviesVM.getSavedMovies()
+            moviesViewModel.getSavedMovies()
         }
 
         viewsOnInit()
@@ -79,16 +83,16 @@ class FragmentSaved : Fragment() {
         recView.adapter = adapter
         adapter.notifyDataSetChanged()
 
-        moviesVM.getSavedMovies()
-        moviesVM.liveData.observe(this, Observer { result ->
+        moviesViewModel.getSavedMovies()
+        moviesViewModel.liveData.observe(this, Observer { result ->
             when (result) {
-                is MoviesVM.State.ShowLoading -> {
+                is MoviesViewModel.State.ShowLoading -> {
                     swipeRefreshLayout.isRefreshing = true
                 }
-                is MoviesVM.State.HideLoading -> {
+                is MoviesViewModel.State.HideLoading -> {
                     swipeRefreshLayout.isRefreshing = false
                 }
-                is MoviesVM.State.Result -> {
+                is MoviesViewModel.State.Result -> {
                     adapter.movies = result.list
                     adapter.notifyDataSetChanged()
                 }

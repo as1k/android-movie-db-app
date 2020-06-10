@@ -20,7 +20,7 @@ object Retrofit {
 }
 
 interface PostApi {
-
+    //user
     @GET("authentication/token/new")
     suspend fun getTokenCoroutine(
         @Query("api_key") apiKey: String
@@ -38,6 +38,7 @@ interface PostApi {
         @Query("session_id") sessionId: String
     ): Response<JsonObject>
 
+    // movie
     @GET("movie/popular")
     suspend fun getMoviesCoroutine(
         @Query("api_key") apiKey: String
