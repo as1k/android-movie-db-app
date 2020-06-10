@@ -15,12 +15,16 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.movie_db.R
 import com.example.movie_db.model.data.authentication.User
 import com.example.movie_db.model.data.authentication.UserResponse
+import com.example.movie_db.model.network.Retrofit
+import com.example.movie_db.model.repository.UserRepository
+import com.example.movie_db.model.repository.UserRepositoryImpl
 import com.example.movie_db.view_model.AuthViewModel
 import com.example.movie_db.view_model.ViewModelProviderFactory
 import com.google.gson.Gson
 
 class SignInActivity : AppCompatActivity() {
 
+    private lateinit var userRepository: UserRepository
     private lateinit var login: EditText
     private lateinit var password: EditText
     private lateinit var loginBtn: Button
@@ -45,8 +49,8 @@ class SignInActivity : AppCompatActivity() {
     private fun setData() {
 
         val viewModelProviderFactory = ViewModelProviderFactory(this)
-        authViewModel = ViewModelProvider(this, viewModelProviderFactory)
-            .get(AuthViewModel::class.java)
+        userRepository = UserRepositoryImpl(Retrofit)
+        authViewModel = AuthViewModel(this, userRepository)
         authViewModel.liveData.observe(this, Observer { result ->
             when (result) {
                 is AuthViewModel.State.ShowLoading -> {
