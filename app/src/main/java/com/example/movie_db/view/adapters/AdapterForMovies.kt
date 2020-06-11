@@ -49,4 +49,14 @@ class AdapterForMovies(var context: Context, var movies: List<Movie>) :
     override fun onBindViewHolder(viewHolder: MyViewHolder, i: Int) {
         viewHolder.bind(movies[i])
     }
+
+    fun replaceItems(moviesList: List<Movie>) {
+        if (movies.isNullOrEmpty()) movies = moviesList
+        else {
+            if (movies!![movies!!.size - 1] != moviesList[moviesList.size - 1])
+                (movies as MutableList).addAll(moviesList)
+        }
+        notifyDataSetChanged()
+    }
+
 }

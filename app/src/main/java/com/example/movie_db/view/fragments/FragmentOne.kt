@@ -16,13 +16,11 @@ import com.example.movie_db.R
 import com.example.movie_db.model.data.movie.Movie
 import kotlin.collections.ArrayList
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import com.example.movie_db.model.database.MovieDao
 import com.example.movie_db.model.database.MovieDatabase
 import com.example.movie_db.model.network.Retrofit
 import com.example.movie_db.model.repository.MovieRepositoryImpl
 import com.example.movie_db.view_model.MoviesViewModel
-import com.example.movie_db.view_model.ViewModelProviderFactory
 
 class FragmentOne : Fragment() {
 
@@ -32,6 +30,8 @@ class FragmentOne : Fragment() {
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
     private lateinit var toolbar: TextView
     private lateinit var moviesViewModel: MoviesViewModel
+    private lateinit var layoutManager: GridLayoutManager
+    private var page: Int = 1
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -66,10 +66,10 @@ class FragmentOne : Fragment() {
     private fun setAdapter() {
         recView.layoutManager = LinearLayoutManager(activity)
         swipeRefreshLayout.setOnRefreshListener {
-            viewsOnInit()
-            moviesViewModel.getMovies()
+//            viewsOnInit()
+//            moviesViewModel.getMovies(page)
         }
-        moviesViewModel.getMovies()
+        moviesViewModel.getMovies(page)
 
         moviesViewModel.liveData.observe(this, Observer { result ->
             when (result) {
@@ -80,7 +80,8 @@ class FragmentOne : Fragment() {
                     swipeRefreshLayout.isRefreshing = false
                 }
                 is MoviesViewModel.State.Result -> {
-                    adapter.movies = result.list
+//                    adapter.movies = result.list
+                    adapter?.replaceItems(result.list)
                     adapter.notifyDataSetChanged()
                 }
             }
@@ -96,10 +97,23 @@ class FragmentOne : Fragment() {
                 movies
             )
         }!!
-        recView.layoutManager = GridLayoutManager(activity, 3)
+        layoutManager = GridLayoutManager(activity, 4)
+        recView.layoutManager = layoutManager
         recView.itemAnimator= DefaultItemAnimator()
         recView.adapter = this.adapter
-        this.adapter.notifyDataSetChanged()
+
+        recView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                if (!recyclerView.canScrollVertically(RecyclerView.FOCUS_DOWN)) {
+                    page++
+                    moviesViewModel.getMovies(page)
+                }
+            }
+        })
+
+//        this.adapter.notifyDataSetChanged()
     }
 
 }
