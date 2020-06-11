@@ -72,8 +72,7 @@ class FragmentSaved : Fragment() {
         movies = ArrayList()
         adapter = activity?.applicationContext?.let {
             AdapterForMovies(
-                it,
-                movies
+                it
             )
         }!!
         recView.layoutManager = GridLayoutManager(activity, 4)
@@ -91,7 +90,7 @@ class FragmentSaved : Fragment() {
                     swipeRefreshLayout.isRefreshing = false
                 }
                 is MoviesViewModel.State.Result -> {
-                    adapter.movies = result.list
+                    adapter.movies = result.list as MutableList<Movie>
                     adapter.notifyDataSetChanged()
                 }
             }

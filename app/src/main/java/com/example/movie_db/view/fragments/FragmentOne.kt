@@ -16,6 +16,7 @@ import com.example.movie_db.R
 import com.example.movie_db.model.data.movie.Movie
 import kotlin.collections.ArrayList
 import androidx.lifecycle.Observer
+import com.example.movie_db.PaginationScrollListener
 import com.example.movie_db.model.database.MovieDao
 import com.example.movie_db.model.database.MovieDatabase
 import com.example.movie_db.model.network.Retrofit
@@ -31,7 +32,10 @@ class FragmentOne : Fragment() {
     private lateinit var toolbar: TextView
     private lateinit var moviesViewModel: MoviesViewModel
     private lateinit var layoutManager: GridLayoutManager
-    private var page: Int = 1
+    private var currentPage = PaginationScrollListener.PAGE_START
+    private var isLastPage = false
+    private var isLoading = false
+    private var itemCount = 0
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -68,20 +72,31 @@ class FragmentOne : Fragment() {
         swipeRefreshLayout.setOnRefreshListener {
 //            viewsOnInit()
 //            moviesViewModel.getMovies(page)
+            adapter?.clear()
+            itemCount = 0
+            currentPage = PaginationScrollListener.PAGE_START
+            isLastPage = false
+            moviesViewModel.getMovies(currentPage)
         }
-        moviesViewModel.getMovies(page)
+        moviesViewModel.getMovies(currentPage)
 
         moviesViewModel.liveData.observe(this, Observer { result ->
             when (result) {
                 is MoviesViewModel.State.ShowLoading -> {
-                    swipeRefreshLayout.isRefreshing = true
+                    swipeRefreshLayout.isRefreshing = currentPage == 1
                 }
                 is MoviesViewModel.State.HideLoading -> {
                     swipeRefreshLayout.isRefreshing = false
                 }
                 is MoviesViewModel.State.Result -> {
+                    itemCount = result.list?.size ?: 0
+                    if (currentPage != PaginationScrollListener.PAGE_START) {
+                        adapter?.removeLoading()
+                    }
 //                    adapter.movies = result.list
                     adapter?.replaceItems(result.list)
+                    adapter?.addLoading()
+                    isLoading = false
                     adapter.notifyDataSetChanged()
                 }
             }
@@ -93,8 +108,7 @@ class FragmentOne : Fragment() {
         movies = ArrayList()
         this.adapter = activity?.applicationContext?.let {
             AdapterForMovies(
-                it,
-                movies
+                it
             )
         }!!
         layoutManager = GridLayoutManager(activity, 4)
@@ -102,18 +116,26 @@ class FragmentOne : Fragment() {
         recView.itemAnimator= DefaultItemAnimator()
         recView.adapter = this.adapter
 
-        recView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                super.onScrolled(recyclerView, dx, dy)
-                if (!recyclerView.canScrollVertically(RecyclerView.FOCUS_DOWN)) {
-                    page++
-                    moviesViewModel.getMovies(page)
-                }
+        recView.addOnScrollListener(object : PaginationScrollListener(layoutManager) {
+            override fun loadMoreItems() {
+                isLoading = true
+                currentPage++
+                moviesViewModel.getMovies(currentPage)
             }
+
+            override fun isLastPage(): Boolean = isLastPage
+            override fun isLoading(): Boolean = isLoading
         })
 
+//        recView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+//            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+//                super.onScrolled(recyclerView, dx, dy)
+//                if (!recyclerView.canScrollVertically(RecyclerView.FOCUS_DOWN)) {
+//                    page++
+//                    moviesViewModel.getMovies(page)
+//                }
+//            }
+//        })
 //        this.adapter.notifyDataSetChanged()
     }
-
 }

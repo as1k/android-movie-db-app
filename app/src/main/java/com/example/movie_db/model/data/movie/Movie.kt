@@ -12,31 +12,31 @@ data class Movie(
     var id: Int,
 
     @SerializedName("isSaved")
-    var isSaved: Boolean,
+    var isSaved: Boolean = false,
 
     @SerializedName("title")
-    var title: String?,
+    var title: String? = null,
 
     @SerializedName("overview")
-    var review: String?,
+    var review: String? = null,
 
     @SerializedName("release_date")
-    var releaseDate: String?,
+    var releaseDate: String? = null,
 
     @SerializedName("popularity")
-    var popularity: Double,
+    var popularity: Double? = null,
 
     @SerializedName("vote_average")
-    var voteRating: Double,
+    var voteRating: Double? = null,
 
     @SerializedName("adultContent")
-    var adultContent: Boolean,
+    var adultContent: Boolean = false,
 
     @SerializedName("backdrop_path")
-    private var pathToBackground: String,
+    private var pathToBackground: String? = null,
 
     @SerializedName("poster_path")
-    private var pathToPoster: String
+    private var pathToPoster: String? = null
 
 ) : Serializable {
 
