@@ -16,7 +16,7 @@ import com.example.movie_db.R
 import com.example.movie_db.model.data.movie.Movie
 import kotlin.collections.ArrayList
 import androidx.lifecycle.Observer
-import com.example.movie_db.PaginationScrollListener
+import com.example.movie_db.utils.PaginationListener
 import com.example.movie_db.model.database.MovieDao
 import com.example.movie_db.model.database.MovieDatabase
 import com.example.movie_db.model.network.Retrofit
@@ -32,7 +32,7 @@ class FragmentOne : Fragment() {
     private lateinit var toolbar: TextView
     private lateinit var moviesViewModel: MoviesViewModel
     private lateinit var layoutManager: GridLayoutManager
-    private var currentPage = PaginationScrollListener.PAGE_START
+    private var currentPage = PaginationListener.PAGE_START
     private var isLastPage = false
     private var isLoading = false
     private var itemCount = 0
@@ -74,7 +74,7 @@ class FragmentOne : Fragment() {
 //            moviesViewModel.getMovies(page)
             adapter?.clear()
             itemCount = 0
-            currentPage = PaginationScrollListener.PAGE_START
+            currentPage = PaginationListener.PAGE_START
             isLastPage = false
             moviesViewModel.getMovies(currentPage)
         }
@@ -90,7 +90,7 @@ class FragmentOne : Fragment() {
                 }
                 is MoviesViewModel.State.Result -> {
                     itemCount = result.list?.size ?: 0
-                    if (currentPage != PaginationScrollListener.PAGE_START) {
+                    if (currentPage != PaginationListener.PAGE_START) {
                         adapter?.removeLoading()
                     }
 //                    adapter.movies = result.list
@@ -116,7 +116,7 @@ class FragmentOne : Fragment() {
         recView.itemAnimator= DefaultItemAnimator()
         recView.adapter = this.adapter
 
-        recView.addOnScrollListener(object : PaginationScrollListener(layoutManager) {
+        recView.addOnScrollListener(object : PaginationListener(layoutManager) {
             override fun loadMoreItems() {
                 isLoading = true
                 currentPage++
