@@ -33,8 +33,8 @@ class MovieRepositoryImpl(
     }
 
 
-    override suspend fun getMoviesCoroutine(apiKey: String): List<Movie>? =
-        movieApi.getPostApi().getMoviesCoroutine(apiKey).body()?.getResults()
+    override suspend fun getMoviesCoroutine(apiKey: String, page: Int): List<Movie>? =
+        movieApi.getPostApi().getMoviesCoroutine(apiKey, page).body()?.getResults()
 
     override suspend fun getMovieCoroutine(movieId: Int, apiKey: String): JsonObject? =
         movieApi.getPostApi().getMovieCoroutine(movieId, apiKey).body()

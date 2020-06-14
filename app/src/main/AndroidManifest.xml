@@ -12,10 +12,18 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <activity android:name=".view.activities.Activator"/>
-        <activity android:name=".view.activities.MainActivity"/>
-        <activity android:name=".view.activities.MovieInfoActivity"/>
-        <activity android:name=".view.activities.SignInActivity">
+        <activity
+            android:name=".view.activities.Activator"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name=".view.activities.MainActivity"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name=".view.activities.MovieInfoActivity"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name=".view.activities.SignInActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

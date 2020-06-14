@@ -34,7 +34,7 @@ class MoviesViewModel(
         job.cancel()
     }
 
-    fun getMovies() {
+    fun getMovies(page: Int) {
         launch {
             liveData.value = State.ShowLoading
             val list = withContext(Dispatchers.IO) {
@@ -58,7 +58,7 @@ class MoviesViewModel(
                         MovieInfoActivity.notSynced = false
                     }
                     try {
-                        val result = movieRepository?.getMoviesCoroutine(BuildConfig.MOVIE_DB_API_KEY)
+                        val result = movieRepository?.getMoviesCoroutine(BuildConfig.MOVIE_DB_API_KEY, page)
                         if (!result.isNullOrEmpty()) {
                             movieRepository?.insertMoviesDB(result as List<Movie>)
                         }

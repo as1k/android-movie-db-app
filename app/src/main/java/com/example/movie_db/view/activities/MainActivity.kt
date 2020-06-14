@@ -34,6 +34,7 @@ class MainActivity : AppCompatActivity() {
         fragmentList.add(fragment2)
         fragmentList.add(fragment3)
         pager = findViewById(R.id.pager)
+        pager.offscreenPageLimit = 3
         pager.setSwiping(false)
         pagerAdapter = AdapterForPager(
             supportFragmentManager,

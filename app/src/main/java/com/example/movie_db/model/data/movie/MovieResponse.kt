@@ -8,6 +8,9 @@ class MovieResponse {
     @SerializedName("results")
     private val results: List<Movie>? = null
 
+    @SerializedName("page")
+    private val page: Int = 1
+
     fun getResults(): List<Movie>? {
         return results
     }

@@ -1,17 +1,12 @@
 package com.example.movie_db.view_model
 
-import android.content.Context
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.movie_db.BuildConfig
 import com.example.movie_db.model.data.authentication.User
 import com.example.movie_db.model.data.movie.Movie
 import com.example.movie_db.model.data.movie.SavingResponse
-import com.example.movie_db.model.database.MovieDao
-import com.example.movie_db.model.database.MovieDatabase
-import com.example.movie_db.model.network.Retrofit
 import com.example.movie_db.model.repository.MovieRepository
-import com.example.movie_db.model.repository.MovieRepositoryImpl
 import com.example.movie_db.view.activities.MovieInfoActivity
 import com.google.gson.Gson
 import com.google.gson.JsonObject

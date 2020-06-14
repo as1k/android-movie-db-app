@@ -14,8 +14,91 @@ import com.example.movie_db.model.data.movie.Movie
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.movie_db.R
 
-class AdapterForMovies(var context: Context, var movies: List<Movie>) :
-    RecyclerView.Adapter<AdapterForMovies.MyViewHolder>() {
+class AdapterForMovies(
+    var context: Context
+//    var movies: List<Movie>
+) :
+    RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+
+    var movies = mutableListOf<Movie>()
+    private val VIEW_TYPE_LOADING = 0
+    private val VIEW_TYPE_NORMAL = 1
+
+    private var isLoaderVisible = false
+
+    override fun getItemCount(): Int = movies.size
+
+    override fun getItemViewType(position: Int): Int {
+        return if (isLoaderVisible) {
+            if (position == movies.size - 1) {
+                VIEW_TYPE_LOADING
+            } else {
+                VIEW_TYPE_NORMAL
+            }
+        } else {
+            VIEW_TYPE_NORMAL
+        }
+    }
+
+    override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+//        val view: View = LayoutInflater.from(viewGroup.context)
+//            .inflate(R.layout.skeleton, viewGroup, false)
+//        return MyViewHolder(view)
+
+        val inflater = LayoutInflater.from(viewGroup.context)
+        return when (viewType) {
+            VIEW_TYPE_NORMAL -> MyViewHolder(
+                inflater.inflate(R.layout.skeleton, viewGroup, false)
+            )
+            VIEW_TYPE_LOADING -> ProgressViewHolder(
+                inflater.inflate(R.layout.progress_layout, viewGroup, false)
+            )
+            else -> throw Throwable("invalid view")
+        }
+    }
+
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, i: Int) {
+        if (holder is MyViewHolder) {
+            holder.bind(movies[i])
+        }
+    }
+
+    fun addLoading() {
+        isLoaderVisible = true
+        movies.add(Movie(id = -1))
+        notifyItemInserted(movies.size - 1)
+    }
+
+    fun removeLoading() {
+        isLoaderVisible = false
+        val position = movies.size - 1
+        if (movies.isNotEmpty()) {
+            val item = getItem(position)
+            if (item != null) {
+                movies.removeAt(position)
+                notifyItemRemoved(position)
+            }
+        }
+    }
+
+    fun clear() {
+        (movies as? ArrayList<Movie>)?.clear()
+        movies.clear()
+        notifyDataSetChanged()
+    }
+
+    private fun getItem(position: Int): Movie? {
+        return movies[position]
+    }
+
+    fun replaceItems(moviesList: List<Movie>) {
+        if (movies.isNullOrEmpty()) movies = moviesList as MutableList<Movie>
+        else {
+            if (movies!![movies!!.size - 1] != moviesList[moviesList.size - 1])
+                (movies as MutableList).addAll(moviesList)
+        }
+        notifyDataSetChanged()
+    }
 
     inner class MyViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
 
@@ -38,15 +121,6 @@ class AdapterForMovies(var context: Context, var movies: List<Movie>) :
         }
     }
 
-    override fun getItemCount(): Int = movies.size
-
-    override fun onCreateViewHolder(viewGroup: ViewGroup, i: Int): MyViewHolder {
-        val view: View = LayoutInflater.from(viewGroup.context)
-            .inflate(R.layout.skeleton, viewGroup, false)
-        return MyViewHolder(view)
-    }
-
-    override fun onBindViewHolder(viewHolder: MyViewHolder, i: Int) {
-        viewHolder.bind(movies[i])
+    inner class ProgressViewHolder(view: View) : RecyclerView.ViewHolder(view) {
     }
 }

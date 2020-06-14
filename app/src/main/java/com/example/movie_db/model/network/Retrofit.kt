@@ -41,7 +41,8 @@ interface PostApi {
     // movie
     @GET("movie/popular")
     suspend fun getMoviesCoroutine(
-        @Query("api_key") apiKey: String
+        @Query("api_key") apiKey: String,
+        @Query("page") page:Int
     ): Response<MovieResponse>
 
     @GET("movie/{movie_id}")

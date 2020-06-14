@@ -15,13 +15,11 @@ import com.example.movie_db.view.adapters.AdapterForMovies
 import com.example.movie_db.R
 import com.example.movie_db.model.data.movie.Movie
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import com.example.movie_db.model.database.MovieDao
 import com.example.movie_db.model.database.MovieDatabase
 import com.example.movie_db.model.network.Retrofit
 import com.example.movie_db.model.repository.MovieRepositoryImpl
 import com.example.movie_db.view_model.MoviesViewModel
-import com.example.movie_db.view_model.ViewModelProviderFactory
 
 
 class FragmentSaved : Fragment() {
@@ -74,11 +72,10 @@ class FragmentSaved : Fragment() {
         movies = ArrayList()
         adapter = activity?.applicationContext?.let {
             AdapterForMovies(
-                it,
-                movies
+                it
             )
         }!!
-        recView.layoutManager = GridLayoutManager(activity, 3)
+        recView.layoutManager = GridLayoutManager(activity, 4)
         recView.itemAnimator = DefaultItemAnimator()
         recView.adapter = adapter
         adapter.notifyDataSetChanged()
@@ -93,7 +90,7 @@ class FragmentSaved : Fragment() {
                     swipeRefreshLayout.isRefreshing = false
                 }
                 is MoviesViewModel.State.Result -> {
-                    adapter.movies = result.list
+                    adapter.movies = result.list as MutableList<Movie>
                     adapter.notifyDataSetChanged()
                 }
             }
