@@ -22,4 +22,7 @@ interface MovieDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertMovieInfo(movie: Movie)
+
+    @Query("UPDATE movie_table SET isSaved = :isSaved WHERE id = :id")
+    fun updateMovieIsSaved(isSaved: Boolean, id: Int)
 }

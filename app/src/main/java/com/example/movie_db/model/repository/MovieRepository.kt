@@ -10,6 +10,7 @@ interface MovieRepository {
     fun getFavoriteDB(): List<Movie>
     fun insertMoviesDB(movies: List<Movie>)
     fun insertMovieInfoDB(movie: Movie)
+    fun updateMovieIsSaved(isSaved: Boolean, id: Int)
 
     suspend fun getMoviesCoroutine(apiKey: String, page: Int) : List<Movie>?
     suspend fun getMovieCoroutine(movieId: Int, apiKey: String): JsonObject?

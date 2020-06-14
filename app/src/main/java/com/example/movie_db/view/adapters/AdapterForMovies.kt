@@ -2,6 +2,7 @@ package com.example.movie_db.view.adapters
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,8 +16,8 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.movie_db.R
 
 class AdapterForMovies(
-    var context: Context
-//    var movies: List<Movie>
+    var context: Context,
+    private val itemClickListener: RecyclerViewItemClick? = null
 ) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
@@ -91,6 +92,24 @@ class AdapterForMovies(
         return movies[position]
     }
 
+    fun addItem(movie: Movie) {
+        movies.add(movie)
+        notifyItemInserted(movies.size - 1)
+    }
+
+    fun updateItem(movie: Movie) {
+        val id = movie.id
+        val isClicked = movie.isSaved
+        val m: Movie? = movies.find { it.id == id }
+        m?.isSaved = isClicked
+        notifyDataSetChanged()
+    }
+
+    fun removeItem(movie: Movie) {
+        movies.remove(movie)
+        notifyDataSetChanged()
+    }
+
     fun replaceItems(moviesList: List<Movie>) {
         if (movies.isNullOrEmpty()) movies = moviesList as MutableList<Movie>
         else {
@@ -102,25 +121,59 @@ class AdapterForMovies(
 
     inner class MyViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
 
-        fun bind(post: Movie?) {
+        fun bind(movie: Movie?) {
             val title = view.findViewById<TextView>(R.id.title)
             val mainPoster = view.findViewById<ImageView>(R.id.mainPoster)
+            val addToSaved = view.findViewById<ImageView>(R.id.ivSave)
+//            val tvReleaseDate = view.findViewById<TextView>(R.id.tvReleaseDate)
 
-            title.text = post?.title
+            title.text = movie?.title
+//            tvReleaseDate.text = movie.releaseDate.substring(0, 4)
+
+//            val foundMovie = movies.find {it.id == movie?.id}
+//            val isClicked = movie?.isSaved
+//            if (isClicked != null) {
+//                foundMovie?.isSaved = isClicked
+//            }
+
+            if (movie?.isSaved!!) {
+                Glide.with(context).load(R.drawable.ic_bookmark).into(addToSaved)
+//                addToSaved.setImageResource(R.drawable.ic_bookmark)
+            } else {
+                Glide.with(context).load(R.drawable.ic_bookmark_filled).into(addToSaved)
+//                addToSaved.setImageResource(R.drawable.ic_bookmark_filled)
+            }
 
             Glide.with(context)
-                .load(post!!.getPathToPoster())
+                .load(movie!!.getPathToPoster())
                 .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
                 .into(mainPoster)
 
             view.setOnClickListener {
-                val intent= Intent(view.context, MovieInfoActivity::class.java)
-                intent.putExtra("movie_id", post.id)
+                itemClickListener?.itemClick(movie)
+                val intent = Intent(view.context, MovieInfoActivity::class.java)
+                intent.putExtra("movie_id", movie.id)
                 view.context.startActivity(intent)
+            }
+
+            addToSaved.setOnClickListener {
+                itemClickListener?.addToFavourites(movie)
+                if (movie.isSaved) {
+                    Glide.with(context).load(R.drawable.ic_bookmark_filled).into(addToSaved)
+                } else {
+                    Glide.with(context).load(R.drawable.ic_bookmark).into(addToSaved)
+                }
+//                movieInfoViewModel.likeMovie(!isSaved, movieId)
+//                refresh()
             }
         }
     }
 
     inner class ProgressViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+    }
+
+    interface RecyclerViewItemClick {
+        fun itemClick(item: Movie)
+        fun addToFavourites(item: Movie)
     }
 }

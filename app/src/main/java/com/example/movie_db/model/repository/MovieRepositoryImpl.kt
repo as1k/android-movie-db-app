@@ -32,6 +32,9 @@ class MovieRepositoryImpl(
         return movieDao.insertMovieInfo(movie)
     }
 
+    override fun updateMovieIsSaved(isSaved: Boolean, id: Int) {
+        return movieDao.updateMovieIsSaved(isSaved, id)
+    }
 
     override suspend fun getMoviesCoroutine(apiKey: String, page: Int): List<Movie>? =
         movieApi.getPostApi().getMoviesCoroutine(apiKey, page).body()?.getResults()

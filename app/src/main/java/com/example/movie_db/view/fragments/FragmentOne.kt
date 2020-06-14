@@ -1,5 +1,6 @@
 package com.example.movie_db.view.fragments
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -21,9 +22,12 @@ import com.example.movie_db.model.database.MovieDao
 import com.example.movie_db.model.database.MovieDatabase
 import com.example.movie_db.model.network.Retrofit
 import com.example.movie_db.model.repository.MovieRepositoryImpl
+import com.example.movie_db.view.activities.MovieInfoActivity
 import com.example.movie_db.view_model.MoviesViewModel
+import androidx.fragment.app.activityViewModels
+import com.example.movie_db.view_model.SharedViewModel
 
-class FragmentOne : Fragment() {
+class FragmentOne : Fragment(), AdapterForMovies.RecyclerViewItemClick {
 
     private lateinit var adapter: AdapterForMovies
     private lateinit var movies: List<Movie>
@@ -36,6 +40,14 @@ class FragmentOne : Fragment() {
     private var isLastPage = false
     private var isLoading = false
     private var itemCount = 0
+    private val sharedViewModel: SharedViewModel by activityViewModels()
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        sharedViewModel.savedMovies.observe(viewLifecycleOwner, Observer { item ->
+            if (!item.isSaved) adapter?.updateItem(item)
+        })
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -45,7 +57,8 @@ class FragmentOne : Fragment() {
         return inflater
             .inflate(
                 R.layout.fragments_activity,
-                container, false) as ViewGroup
+                container, false
+            ) as ViewGroup
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -64,7 +77,7 @@ class FragmentOne : Fragment() {
 
         val movieDao: MovieDao = MovieDatabase.getDatabase(requireContext()).movieDao()
         val movieRepository = MovieRepositoryImpl(Retrofit, movieDao)
-        moviesViewModel = MoviesViewModel(requireContext(), movieRepository)
+        moviesViewModel = MoviesViewModel(movieRepository)
     }
 
     private fun setAdapter() {
@@ -80,7 +93,7 @@ class FragmentOne : Fragment() {
         }
         moviesViewModel.getMovies(currentPage)
 
-        moviesViewModel.liveData.observe(this, Observer { result ->
+        moviesViewModel.liveData.observe(viewLifecycleOwner, Observer { result ->
             when (result) {
                 is MoviesViewModel.State.ShowLoading -> {
                     swipeRefreshLayout.isRefreshing = currentPage == 1
@@ -113,7 +126,7 @@ class FragmentOne : Fragment() {
         }!!
         layoutManager = GridLayoutManager(activity, 4)
         recView.layoutManager = layoutManager
-        recView.itemAnimator= DefaultItemAnimator()
+        recView.itemAnimator = DefaultItemAnimator()
         recView.adapter = this.adapter
 
         recView.addOnScrollListener(object : PaginationListener(layoutManager) {
@@ -137,5 +150,18 @@ class FragmentOne : Fragment() {
 //            }
 //        })
 //        this.adapter.notifyDataSetChanged()
+    }
+
+
+    override fun itemClick(item: Movie) {
+        val intent = Intent(context, MovieInfoActivity::class.java)
+        intent.putExtra("movie_id", item.id)
+        startActivity(intent)
+    }
+
+    override fun addToFavourites(item: Movie) {
+        if (!item.isSaved)
+            moviesViewModel.addToFavourites(item)
+        sharedViewModel.setMovie(item)
     }
 }

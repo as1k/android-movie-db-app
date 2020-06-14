@@ -11,9 +11,6 @@ data class Movie(
     @SerializedName("id")
     var id: Int,
 
-    @SerializedName("isSaved")
-    var isSaved: Boolean = false,
-
     @SerializedName("title")
     var title: String? = null,
 
@@ -36,7 +33,10 @@ data class Movie(
     private var pathToBackground: String? = null,
 
     @SerializedName("poster_path")
-    private var pathToPoster: String? = null
+    private var pathToPoster: String? = null,
+
+    @SerializedName("isSaved")
+    var isSaved: Boolean = false
 
 ) : Serializable {
 

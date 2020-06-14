@@ -8,7 +8,7 @@
     <androidx.cardview.widget.CardView
         android:id="@+id/card_view"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
+        android:layout_height="250dp"
         android:layout_gravity="center"
         android:layout_margin="@dimen/card_margin"
         android:elevation="3dp"
@@ -63,24 +63,33 @@
                 card_view:layout_constraintBottom_toBottomOf="parent"
                 card_view:layout_constraintStart_toStartOf="parent" />
 
-            <TextView
-                android:id="@+id/year"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+            <ImageView
+                android:id="@+id/ivSave"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
                 android:layout_below="@+id/mainPoster"
-                android:fontFamily="@font/g_light"
-                android:gravity="right|bottom"
-                android:paddingLeft="@dimen/movie_title_padding"
-                android:paddingTop="@dimen/movie_title_padding"
-                android:paddingEnd="2dp"
-                android:paddingRight="@dimen/movie_title_padding"
-                android:paddingBottom="2dp"
-                android:text="2020"
-                android:textColor="@color/textGray"
-                android:textSize="12dp"
-                android:textStyle="bold"
+                android:gravity="end|bottom"
                 card_view:layout_constraintBottom_toBottomOf="parent"
-                card_view:layout_constraintEnd_toEndOf="parent" />
+                card_view:layout_constraintEnd_toEndOf="parent"
+                card_view:srcCompat="@drawable/ic_bookmark_filled" />
+
+            <!--            <TextView-->
+            <!--                android:id="@+id/year"-->
+            <!--                android:layout_width="match_parent"-->
+            <!--                android:layout_height="wrap_content"-->
+            <!--                android:layout_below="@+id/mainPoster"-->
+            <!--                android:fontFamily="@font/g_light"-->
+            <!--                android:gravity="right|bottom"-->
+            <!--                android:paddingLeft="@dimen/movie_title_padding"-->
+            <!--                android:paddingTop="@dimen/movie_title_padding"-->
+            <!--                android:paddingEnd="2dp"-->
+            <!--                android:paddingBottom="2dp"-->
+            <!--                android:text="2020"-->
+            <!--                android:textColor="@color/textGray"-->
+            <!--                android:textSize="12dp"-->
+            <!--                android:textStyle="bold"-->
+            <!--                card_view:layout_constraintBottom_toBottomOf="parent"-->
+            <!--                card_view:layout_constraintEnd_toEndOf="parent" />-->
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>

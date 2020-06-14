@@ -20,6 +20,8 @@ import com.example.movie_db.model.database.MovieDatabase
 import com.example.movie_db.model.network.Retrofit
 import com.example.movie_db.model.repository.MovieRepositoryImpl
 import com.example.movie_db.view_model.MoviesViewModel
+import androidx.fragment.app.activityViewModels
+import com.example.movie_db.view_model.SharedViewModel
 
 
 class FragmentSaved : Fragment() {
@@ -30,6 +32,16 @@ class FragmentSaved : Fragment() {
     private lateinit var movies: List<Movie>
     private lateinit var toolbar: TextView
     private lateinit var moviesViewModel: MoviesViewModel
+    private val sharedViewModel: SharedViewModel by activityViewModels()
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        sharedViewModel.savedMovies.observe(viewLifecycleOwner, Observer { item ->
+
+            if (item.isSaved) adapter?.addItem(item)
+            else adapter?.removeItem(item)
+        })
+    }
 
     override fun onResume() {
         super.onResume()
@@ -56,7 +68,7 @@ class FragmentSaved : Fragment() {
 
         val movieDao: MovieDao = MovieDatabase.getDatabase(requireContext()).movieDao()
         val movieRepository = MovieRepositoryImpl(Retrofit, movieDao)
-        moviesViewModel = MoviesViewModel(requireContext(), movieRepository)
+        moviesViewModel = MoviesViewModel(movieRepository)
 
         swipeRefreshLayout = rootView.findViewById(R.id.main_content)
         swipeRefreshLayout.setOnRefreshListener {
@@ -81,7 +93,7 @@ class FragmentSaved : Fragment() {
         adapter.notifyDataSetChanged()
 
         moviesViewModel.getSavedMovies()
-        moviesViewModel.liveData.observe(this, Observer { result ->
+        moviesViewModel.liveData.observe(viewLifecycleOwner, Observer { result ->
             when (result) {
                 is MoviesViewModel.State.ShowLoading -> {
                     swipeRefreshLayout.isRefreshing = true

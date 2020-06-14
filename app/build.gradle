@@ -90,4 +90,7 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-viewmodel:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.2.0'
+
+    //SharedViewModel
+    implementation "androidx.fragment:fragment-ktx:1.2.5"
 }
