@@ -1,10 +1,8 @@
 package com.example.movie_db.model.repository
 
 import com.example.movie_db.model.data.movie.Movie
-import com.example.movie_db.model.data.movie.MovieResponse
 import com.example.movie_db.model.database.MovieDao
 import com.example.movie_db.model.network.Retrofit
-import com.example.movie_db.model.repository.MovieRepository
 import com.google.gson.JsonObject
 
 class MovieRepositoryImpl(
@@ -12,6 +10,7 @@ class MovieRepositoryImpl(
     private var movieDao: MovieDao
 ): MovieRepository {
 
+    // local
     override fun getMoviesDB(): List<Movie> {
         return movieDao.getAll()
     }
@@ -28,31 +27,24 @@ class MovieRepositoryImpl(
         return movieDao.insertMovieInfo(movie)
     }
 
-//    override fun updateMovieIsSaved(isSaved: Boolean, id: Int) {
-//        return movieDao.updateMovieIsSaved(isSaved, id)
-//    }
-
-    override fun getLikedLocalDS(id: Int?): Int {
+    //favorite movies
+    override fun getLikedDB(id: Int?): Int {
         return movieDao.getLiked(id)
     }
 
-    override fun getAllLikedLocalDS(liked: Boolean): List<Movie> {
-        return movieDao.getFavorite(liked)
+    override fun getAllLikedDB(liked: Boolean): List<Movie> {
+        return movieDao.getFavoriteMovies(liked)
     }
 
-    override fun setLikeLocalDS(liked: Boolean, id: Int?) {
+    override fun setLikeDB(liked: Boolean, id: Int?) {
         return movieDao.setLike(liked, id)
     }
 
-    override fun getIdOfflineLocalDS(liked: Boolean?): List<Int> {
-        return movieDao.getIdOffline(liked)
+    override fun getLikedMovieIdDB(liked: Boolean?): List<Int> {
+        return movieDao.getLikedMovieId(liked)
     }
 
-    override fun getMovieOfflineLocalDS(liked: Boolean?): List<Movie> {
-        return movieDao.getMovieOffline(liked)
-    }
-
-
+    // remote
     override suspend fun getMoviesCoroutine(apiKey: String, page: Int): List<Movie>? =
         movieApi.getPostApi().getMoviesCoroutine(apiKey, page).body()?.results
 

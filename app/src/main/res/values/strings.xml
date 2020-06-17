@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">BatFilms</string>
     <string name="movies">Movies</string>
+    <string name="favorites">Favorites</string>
+    <string name="profile">Profile</string>
+    <string name="adult_content">18+</string>
+    <string name="not_adult_content">12+</string>
 </resources>

@@ -8,7 +8,6 @@ import com.example.movie_db.model.data.authentication.LoginResponse
 import com.example.movie_db.model.data.authentication.SessionResponse
 import com.example.movie_db.model.data.authentication.TokenResponse
 import com.example.movie_db.model.data.authentication.UserResponse
-import com.example.movie_db.model.network.Retrofit
 import com.example.movie_db.model.repository.UserRepository
 import com.google.gson.Gson
 import com.google.gson.JsonObject
@@ -17,9 +16,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
-import com.example.movie_db.model.repository.UserRepositoryImpl
 
-class AuthViewModel(private val context: Context, private var userRepository: UserRepository? = null) : ViewModel(), CoroutineScope {
+class AuthViewModel(private var userRepository: UserRepository? = null) : ViewModel(), CoroutineScope {
 
     private val job = Job()
     var liveData = MutableLiveData<State>()
@@ -38,9 +36,9 @@ class AuthViewModel(private val context: Context, private var userRepository: Us
             val token = userRepository
                     ?.getTokenCoroutine(BuildConfig.MOVIE_DB_API_KEY)
             try {
-                val token = Gson().fromJson(token, TokenResponse::class.java)
+                val newToken = Gson().fromJson(token, TokenResponse::class.java)
                 if (token != null) {
-                    val request = token.requestToken
+                    val request = newToken.requestToken
                     val body = JsonObject().apply {
                         addProperty("username", login)
                         addProperty("password", password)
@@ -62,13 +60,13 @@ class AuthViewModel(private val context: Context, private var userRepository: Us
 
                 val loginResponse = Gson().fromJson(response, LoginResponse::class.java)
                 if (loginResponse != null) {
-                    val body = JsonObject().apply {
+                    val newBody = JsonObject().apply {
                         addProperty(
                             "request_token",
                             loginResponse.requestToken.toString()
                         )
                     }
-                    getSession(body)
+                    getSession(newBody)
                 }
             } catch (e: Exception) {
                 liveData.value = State.Result(false)

@@ -1,19 +1,14 @@
 package com.example.movie_db.view_model
 
-import android.content.Context
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.movie_db.BuildConfig
 import com.example.movie_db.model.data.movie.Movie
 import com.example.movie_db.model.data.authentication.User
-import com.example.movie_db.model.data.movie.SavingResponse
-import com.example.movie_db.model.data.movie.SelectedMovie
 import com.example.movie_db.model.repository.MovieRepository
-import com.google.gson.Gson
 import com.google.gson.JsonObject
 import kotlinx.coroutines.*
 import java.lang.Exception
-import java.util.*
 import kotlin.coroutines.CoroutineContext
 
 class MoviesViewModel(
@@ -50,14 +45,14 @@ class MoviesViewModel(
                             for (favorite in favResponse!!) {
                                 if(movie.id == favorite.id) {
                                     movie.liked = true
-                                    movieRepository.setLikeLocalDS(true, movie.id)
+                                    movieRepository.setLikeDB(true, movie.id)
                                 }
                             }
                         }
                     }
                     response
                 } catch (e: Exception) {
-                    movieRepository.getMoviesDB() ?: emptyList()
+                    movieRepository.getMoviesDB()
                 }
             }
             liveData.value = State.HideLoading
@@ -78,12 +73,12 @@ class MoviesViewModel(
                     if (!response.isNullOrEmpty()) {
                         for (m in response) {
                             m.liked = true
-                            movieRepository.setLikeLocalDS(true, m.id)
+                            movieRepository.setLikeDB(true, m.id)
                         }
                     }
                     response
                 } catch (e: Exception) {
-                    movieRepository.getAllLikedLocalDS(true)
+                    movieRepository.getAllLikedDB(true)
                 }
             }
             liveData.value = State.HideLoading
@@ -118,7 +113,6 @@ class MoviesViewModel(
     sealed class State {
         object ShowLoading : State()
         object HideLoading : State()
-        data class Result(val list: List<com.example.movie_db.model.data.movie.Movie>?) : State()
-        data class IsFavorite(val isFavorite: Boolean) : State()
+        data class Result(val list: List<Movie>?) : State()
     }
 }

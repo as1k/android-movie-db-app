@@ -1,9 +1,6 @@
 package com.example.movie_db.model.repository
 
-import com.example.movie_db.model.data.authentication.UserResponse
-import com.example.movie_db.model.data.movie.MovieResponse
 import com.google.gson.JsonObject
-import retrofit2.Response
 
 interface UserRepository {
 

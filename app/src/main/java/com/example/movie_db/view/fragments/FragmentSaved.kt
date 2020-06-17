@@ -1,18 +1,15 @@
 package com.example.movie_db.view.fragments
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.example.movie_db.view.adapters.AdapterForMovies
 import com.example.movie_db.R
 import com.example.movie_db.model.data.movie.Movie
 import androidx.lifecycle.Observer
@@ -23,7 +20,6 @@ import com.example.movie_db.model.repository.MovieRepositoryImpl
 import com.example.movie_db.view_model.MoviesViewModel
 import androidx.fragment.app.activityViewModels
 import com.example.movie_db.model.repository.MovieRepository
-import com.example.movie_db.view.activities.MovieInfoFragment
 import com.example.movie_db.view.adapters.FavouritesAdapter
 import com.example.movie_db.view_model.SharedViewModel
 import kotlinx.android.synthetic.main.main_layout.*
@@ -42,8 +38,8 @@ class FragmentSaved : Fragment(), FavouritesAdapter.RecyclerViewItemClick {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         sharedViewModel.savedMovies.observe(viewLifecycleOwner, Observer { item ->
-            if (item.liked) favAdapter?.addItem(item)
-            else favAdapter?.removeItem(item)
+            if (item.liked) favAdapter.addItem(item)
+            else favAdapter.removeItem(item)
         })
     }
 
@@ -76,7 +72,7 @@ class FragmentSaved : Fragment(), FavouritesAdapter.RecyclerViewItemClick {
         swipeRefreshLayoutFav = view.findViewById(R.id.swipeInFragments)
         recViewFav = view.findViewById(R.id.recycler_view)
         toolbar = view.findViewById(R.id.toolbar)
-        toolbar.text = "Favorites"
+        toolbar.text = getString(R.string.favorites)
     }
 
     private fun setViewModel() {
@@ -88,7 +84,7 @@ class FragmentSaved : Fragment(), FavouritesAdapter.RecyclerViewItemClick {
     private fun swipeRefresh() {
         recViewFav.layoutManager = LinearLayoutManager(requireActivity())
         swipeRefreshLayoutFav.setOnRefreshListener {
-            favAdapter?.clearAll()
+            favAdapter.clearAll()
             moviesViewModel.getSavedMovies()
         }
     }
@@ -111,7 +107,7 @@ class FragmentSaved : Fragment(), FavouritesAdapter.RecyclerViewItemClick {
                     swipeRefreshLayoutFav.isRefreshing = false
                 }
                 is MoviesViewModel.State.Result -> {
-                    favAdapter?.addItems(result.list!!)
+                    favAdapter.addItems(result.list!!)
                 }
             }
         })
@@ -126,7 +122,8 @@ class FragmentSaved : Fragment(), FavouritesAdapter.RecyclerViewItemClick {
 
         val bundle = Bundle()
         bundle.putInt("id", item.id)
-        val movieInfoFragment = MovieInfoFragment()
+        val movieInfoFragment =
+            MovieInfoFragment()
         movieInfoFragment.arguments = bundle
         parentFragmentManager.beginTransaction().add(R.id.frameLayout, movieInfoFragment).addToBackStack(null).commit()
         requireActivity().bottom_navigation.visibility = View.GONE
@@ -140,7 +137,7 @@ class FragmentSaved : Fragment(), FavouritesAdapter.RecyclerViewItemClick {
 //    private fun viewsOnInit() {
 //        movies = ArrayList()
 //        adapter = activity?.applicationContext?.let {
-//            AdapterForMovies(
+//            MoviesAdapter(
 //                it
 //            )
 //        }!!

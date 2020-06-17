@@ -20,23 +20,16 @@ interface MovieDao {
     @Query("SELECT * FROM movie_table WHERE id = :id")
     fun getMovieInfo(id: Int?): Movie
 
-    // fav
-
-    @Query("SELECT*FROM movie_table where liked=:liked")
-    fun getMovieOffline(liked: Boolean?): List<Movie>
-
+    // favorite movies
     @Query("SELECT * FROM movie_table WHERE liked = :liked")
-    fun getFavorite(liked: Boolean): List<Movie>
+    fun getFavoriteMovies(liked: Boolean): List<Movie>
 
     @Query("update movie_table set liked = :likeCnt where id = :id")
     fun setLike(likeCnt: Boolean, id: Int?)
 
-    @Query("SELECT liked FROM movie_table where id=:id")
+    @Query("SELECT liked FROM movie_table where id = :id")
     fun getLiked(id: Int?): Int
 
-    @Query("SELECT id FROM movie_table where liked=:liked")
-    fun getIdOffline(liked: Boolean?): List<Int>
-
-//    @Query("UPDATE movie_table SET liked = :liked WHERE id = :id")
-//    fun updateMovieIsSaved(liked: Boolean, id: Int)
+    @Query("SELECT id FROM movie_table where liked = :liked")
+    fun getLikedMovieId(liked: Boolean?): List<Int>
 }

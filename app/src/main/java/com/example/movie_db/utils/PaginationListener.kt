@@ -3,7 +3,6 @@ package com.example.movie_db.utils
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
-
 abstract class PaginationListener(
     var layoutManager: LinearLayoutManager
 ) : RecyclerView.OnScrollListener() {

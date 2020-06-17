@@ -39,7 +39,7 @@ class MovieInfoViewModel(private val movieRepository: MovieRepository) : ViewMod
                         .getMovieCoroutine(movieId, BuildConfig.MOVIE_DB_API_KEY)
                     if (response != null) {
                         if (response.liked) {
-                            movieRepository.setLikeLocalDS(true, response.id)
+                            movieRepository.setLikeDB(true, response.id)
                         }
                     }
                     response
@@ -116,15 +116,15 @@ class MovieInfoViewModel(private val movieRepository: MovieRepository) : ViewMod
                         SavingResponse::class.java
                     ).favorite
                     if (like) {
-                        movieRepository.setLikeLocalDS(true, movieId)
+                        movieRepository.setLikeDB(true, movieId)
                         1
                     } else {
-                        movieRepository.setLikeLocalDS(false, movieId)
+                        movieRepository.setLikeDB(false, movieId)
                         0
                     }
 //                        liveData.value = State.IsFavorite(like)
                 } catch (e: Exception) {
-                    movieRepository.getLikedLocalDS(movieId)
+                    movieRepository.getLikedDB(movieId)
 //                    liveData.value = State.IsFavorite(movie.liked)
                 }
             }

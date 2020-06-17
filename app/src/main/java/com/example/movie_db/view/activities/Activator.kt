@@ -7,22 +7,14 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import com.example.movie_db.BuildConfig
 import com.example.movie_db.R
-import com.example.movie_db.model.network.Retrofit
 import com.example.movie_db.model.data.authentication.UserResponse
 import com.example.movie_db.model.data.authentication.User
 import com.example.movie_db.view_model.AuthViewModel
 import com.example.movie_db.view_model.ViewModelProviderFactory
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import java.lang.Exception
 import java.lang.reflect.Type
-import kotlin.coroutines.CoroutineContext
 
 class Activator : AppCompatActivity() {
     private lateinit var authViewModel: AuthViewModel

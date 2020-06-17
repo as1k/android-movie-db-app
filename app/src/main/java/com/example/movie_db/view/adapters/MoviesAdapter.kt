@@ -1,7 +1,6 @@
 package com.example.movie_db.view.adapters
 
 import android.content.Context
-import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.View
@@ -14,7 +13,7 @@ import com.bumptech.glide.Glide
 import com.example.movie_db.R
 import com.example.movie_db.model.data.movie.Movie
 
-class AdapterForMovies(
+class MoviesAdapter(
     private val itemClickListner: RecyclerViewItemClick? = null,
     val context: Context
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {

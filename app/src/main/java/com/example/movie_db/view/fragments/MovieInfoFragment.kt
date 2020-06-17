@@ -1,12 +1,10 @@
-package com.example.movie_db.view.activities
+package com.example.movie_db.view.fragments
 
-import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.bumptech.glide.Glide
@@ -14,13 +12,11 @@ import com.example.movie_db.R
 import com.example.movie_db.model.data.movie.Movie
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.lifecycle.Observer
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.movie_db.model.database.MovieDao
 import com.example.movie_db.model.database.MovieDatabase
 import com.example.movie_db.model.network.Retrofit
 import com.example.movie_db.model.repository.MovieRepository
 import com.example.movie_db.model.repository.MovieRepositoryImpl
-import com.example.movie_db.utils.PaginationListener
 import com.example.movie_db.view_model.MovieInfoViewModel
 import com.example.movie_db.view_model.SharedViewModel
 
@@ -120,9 +116,9 @@ class MovieInfoFragment : Fragment() {
         review.text = movie.review
         releaseDate.text = movie.releaseDate
         if (movie.adultContent)
-            adultContent.text = "18+"
+            adultContent.text = getString(R.string.adult_content)
         else
-            adultContent.text = "12+"
+            adultContent.text = getString(R.string.not_adult_content)
         rating.text = movie.voteRating.toString()
         popularity.text = movie.popularity.toString()
         isFavoriteMovie(movie.id)

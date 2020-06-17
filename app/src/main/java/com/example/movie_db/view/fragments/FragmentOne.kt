@@ -1,21 +1,18 @@
 package com.example.movie_db.view.fragments
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.example.movie_db.view.adapters.AdapterForMovies
+import com.example.movie_db.view.adapters.MoviesAdapter
 import com.example.movie_db.R
 import com.example.movie_db.model.data.movie.Movie
-import kotlin.collections.ArrayList
 import androidx.lifecycle.Observer
 import com.example.movie_db.utils.PaginationListener
 import com.example.movie_db.model.database.MovieDao
@@ -25,14 +22,12 @@ import com.example.movie_db.model.repository.MovieRepositoryImpl
 import com.example.movie_db.view_model.MoviesViewModel
 import androidx.fragment.app.activityViewModels
 import com.example.movie_db.model.repository.MovieRepository
-import com.example.movie_db.view.activities.MovieInfoFragment
 import com.example.movie_db.view_model.SharedViewModel
 import kotlinx.android.synthetic.main.main_layout.*
 
-class FragmentOne : Fragment(), AdapterForMovies.RecyclerViewItemClick {
+class FragmentOne : Fragment(), MoviesAdapter.RecyclerViewItemClick {
 
-    private lateinit var adapter: AdapterForMovies
-//    private lateinit var movies: List<Movie>
+    private lateinit var adapter: MoviesAdapter
     private lateinit var recView: RecyclerView
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
     private lateinit var toolbar: TextView
@@ -48,7 +43,7 @@ class FragmentOne : Fragment(), AdapterForMovies.RecyclerViewItemClick {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         sharedViewModel.savedMovies.observe(requireActivity(), Observer { item ->
-            adapter?.updateItem(item)
+            adapter.updateItem(item)
         })
     }
 
@@ -78,7 +73,7 @@ class FragmentOne : Fragment(), AdapterForMovies.RecyclerViewItemClick {
 
     private fun bindView(view: View) {
         toolbar = view.findViewById(R.id.toolbar)
-        toolbar.text = "Movies"
+        toolbar.text = getString(R.string.movies)
         recView = view.findViewById(R.id.recycler_view)
         swipeRefreshLayout = view.findViewById(R.id.swipeInFragments)
 
@@ -88,7 +83,6 @@ class FragmentOne : Fragment(), AdapterForMovies.RecyclerViewItemClick {
     }
 
     private fun setViewModels() {
-//        val appContainer = (activity?.application as MyApplication).appContainer
         val movieDao: MovieDao = MovieDatabase.getDatabase(requireContext()).movieDao()
         val movieRepository: MovieRepository = MovieRepositoryImpl(Retrofit, movieDao)
         moviesViewModel = MoviesViewModel(movieRepository)
@@ -97,7 +91,7 @@ class FragmentOne : Fragment(), AdapterForMovies.RecyclerViewItemClick {
     private fun setAdapter() {
         layoutManager = GridLayoutManager(requireActivity(), 3)
         recView.layoutManager = layoutManager
-        adapter = AdapterForMovies(this, requireActivity())
+        adapter = MoviesAdapter(this, requireActivity())
         recView.adapter = adapter
 
         recView.addOnScrollListener(object : PaginationListener(layoutManager) {
@@ -116,7 +110,7 @@ class FragmentOne : Fragment(), AdapterForMovies.RecyclerViewItemClick {
     private fun refresh() {
         recView.layoutManager = LinearLayoutManager(requireActivity())
         swipeRefreshLayout.setOnRefreshListener {
-            adapter?.clearAll()
+            adapter.clearAll()
             itemCount = 0
             currentPage= PaginationListener.PAGE_START
             isLastPage = false
@@ -135,9 +129,9 @@ class FragmentOne : Fragment(), AdapterForMovies.RecyclerViewItemClick {
                     swipeRefreshLayout.isRefreshing = false
                 }
                 is MoviesViewModel.State.Result -> {
-                    adapter?.removeFooterLoading()
-                    adapter?.addItems(result.list!!)
-                    adapter?.addFooterLoading()
+                    adapter.removeFooterLoading()
+                    adapter.addItems(result.list!!)
+                    adapter.addFooterLoading()
                     isLoading = false
                 }
             }
@@ -153,7 +147,8 @@ class FragmentOne : Fragment(), AdapterForMovies.RecyclerViewItemClick {
 
         val bundle = Bundle()
         bundle.putInt("id", item.id)
-        val movieInfoFragment = MovieInfoFragment()
+        val movieInfoFragment =
+            MovieInfoFragment()
         movieInfoFragment.arguments = bundle
         parentFragmentManager.beginTransaction().add(R.id.frameLayout, movieInfoFragment).addToBackStack(null).commit()
         requireActivity().bottom_navigation.visibility = View.GONE
@@ -168,7 +163,7 @@ class FragmentOne : Fragment(), AdapterForMovies.RecyclerViewItemClick {
 //    private fun viewsOnInit() {
 //        movies = ArrayList()
 //        this.adapter = activity?.applicationContext?.let {
-//            AdapterForMovies(
+//            MoviesAdapter(
 //                it
 //            )
 //        }!!

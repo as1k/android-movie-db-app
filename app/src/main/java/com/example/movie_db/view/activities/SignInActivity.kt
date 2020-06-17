@@ -11,7 +11,6 @@ import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import com.example.movie_db.R
 import com.example.movie_db.model.data.authentication.User
 import com.example.movie_db.model.data.authentication.UserResponse
@@ -19,7 +18,6 @@ import com.example.movie_db.model.network.Retrofit
 import com.example.movie_db.model.repository.UserRepository
 import com.example.movie_db.model.repository.UserRepositoryImpl
 import com.example.movie_db.view_model.AuthViewModel
-import com.example.movie_db.view_model.ViewModelProviderFactory
 import com.google.gson.Gson
 
 class SignInActivity : AppCompatActivity() {
@@ -47,10 +45,8 @@ class SignInActivity : AppCompatActivity() {
     }
 
     private fun setData() {
-
-        val viewModelProviderFactory = ViewModelProviderFactory(this)
         userRepository = UserRepositoryImpl(Retrofit)
-        authViewModel = AuthViewModel(this, userRepository)
+        authViewModel = AuthViewModel(userRepository)
         authViewModel.liveData.observe(this, Observer { result ->
             when (result) {
                 is AuthViewModel.State.ShowLoading -> {
