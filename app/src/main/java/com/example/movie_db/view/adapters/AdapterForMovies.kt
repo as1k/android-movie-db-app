@@ -2,32 +2,50 @@ package com.example.movie_db.view.adapters
 
 import android.content.Context
 import android.content.Intent
-import android.util.Log
+import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.appcompat.content.res.AppCompatResources.getDrawable
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.example.movie_db.view.activities.MovieInfoActivity
-import com.example.movie_db.model.data.movie.Movie
-import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.movie_db.R
+import com.example.movie_db.model.data.movie.Movie
 
 class AdapterForMovies(
-    var context: Context,
-    private val itemClickListener: RecyclerViewItemClick? = null
-) :
-    RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+    private val itemClickListner: RecyclerViewItemClick? = null,
+    val context: Context
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    var movies = mutableListOf<Movie>()
     private val VIEW_TYPE_LOADING = 0
     private val VIEW_TYPE_NORMAL = 1
-
     private var isLoaderVisible = false
+    private var moviePosition = 1
 
-    override fun getItemCount(): Int = movies.size
+    private var movies = listOf<Movie>()
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        val inflater = LayoutInflater.from(parent.context)
+        return when (viewType) {
+            VIEW_TYPE_NORMAL -> MoviesViewHolder(
+                inflater.inflate(R.layout.skeleton, parent, false)
+            )
+            VIEW_TYPE_LOADING -> LoaderViewHolder(
+                inflater.inflate(R.layout.progress_layout, parent, false)
+            )
+            else -> throw Throwable("Invalid View!")
+        }
+    }
+
+    override fun getItemCount(): Int = movies.size ?: 0
+
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        if (holder is MoviesViewHolder) {
+            return holder.bind(movies[position])
+        }
+    }
 
     override fun getItemViewType(position: Int): Int {
         return if (isLoaderVisible) {
@@ -41,139 +59,104 @@ class AdapterForMovies(
         }
     }
 
-    override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-//        val view: View = LayoutInflater.from(viewGroup.context)
-//            .inflate(R.layout.skeleton, viewGroup, false)
-//        return MyViewHolder(view)
-
-        val inflater = LayoutInflater.from(viewGroup.context)
-        return when (viewType) {
-            VIEW_TYPE_NORMAL -> MyViewHolder(
-                inflater.inflate(R.layout.skeleton, viewGroup, false)
-            )
-            VIEW_TYPE_LOADING -> ProgressViewHolder(
-                inflater.inflate(R.layout.progress_layout, viewGroup, false)
-            )
-            else -> throw Throwable("invalid view")
-        }
-    }
-
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, i: Int) {
-        if (holder is MyViewHolder) {
-            holder.bind(movies[i])
-        }
-    }
-
-    fun addLoading() {
+    fun addFooterLoading() {
         isLoaderVisible = true
-        movies.add(Movie(id = -1))
-        notifyItemInserted(movies.size - 1)
+        (movies as? ArrayList<Movie>)?.add(Movie(id = -1))
+        notifyItemInserted(movies.size.minus(1))
     }
 
-    fun removeLoading() {
+    fun removeFooterLoading() {
         isLoaderVisible = false
-        val position = movies.size - 1
+        val position = movies.size.minus(1)
         if (movies.isNotEmpty()) {
             val item = getItem(position)
             if (item != null) {
-                movies.removeAt(position)
+                (movies as? ArrayList<Movie>)?.removeAt(position)
                 notifyItemRemoved(position)
             }
         }
-    }
 
-    fun clear() {
-        (movies as? ArrayList<Movie>)?.clear()
-        movies.clear()
-        notifyDataSetChanged()
     }
 
     private fun getItem(position: Int): Movie? {
         return movies[position]
     }
 
-    fun addItem(movie: Movie) {
-        movies.add(movie)
-        notifyItemInserted(movies.size - 1)
+    fun addItems(moviesList: List<Movie>) {
+        if (movies.isEmpty()) movies = moviesList
+        else {
+            if (movies[movies.size - 1] != moviesList[moviesList.size - 1])
+                (movies as? ArrayList<Movie>)?.addAll(moviesList)
+        }
+        notifyDataSetChanged()
     }
 
     fun updateItem(movie: Movie) {
-        val id = movie.id
-        val isClicked = movie.isSaved
-        val m: Movie? = movies.find { it.id == id }
-        m?.isSaved = isClicked
+        val foundMovie = movies.find { it.id == movie.id }
+        foundMovie?.liked = movie.liked
         notifyDataSetChanged()
     }
 
-    fun removeItem(movie: Movie) {
-        movies.remove(movie)
+    fun clearAll() {
+        (movies as? ArrayList<Movie>)?.clear()
+        moviePosition = 1
         notifyDataSetChanged()
     }
 
-    fun replaceItems(moviesList: List<Movie>) {
-        if (movies.isNullOrEmpty()) movies = moviesList as MutableList<Movie>
-        else {
-            if (movies!![movies!!.size - 1] != moviesList[moviesList.size - 1])
-                (movies as MutableList).addAll(moviesList)
-        }
-        notifyDataSetChanged()
-    }
+    inner class MoviesViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        private val mainPoster: ImageView = itemView.findViewById(R.id.mainPoster)
+        private val title: TextView = itemView.findViewById(R.id.title)
+        private val movieId: TextView = itemView.findViewById(R.id.movieId)
+        private val btnSave: ImageView = itemView.findViewById(R.id.ivSave)
+        private var id: Int = 0
 
-    inner class MyViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
+        fun bind(movie: Movie) {
 
-        fun bind(movie: Movie?) {
-            val title = view.findViewById<TextView>(R.id.title)
-            val mainPoster = view.findViewById<ImageView>(R.id.mainPoster)
-            val addToSaved = view.findViewById<ImageView>(R.id.ivSave)
-//            val tvReleaseDate = view.findViewById<TextView>(R.id.tvReleaseDate)
-
-            title.text = movie?.title
-//            tvReleaseDate.text = movie.releaseDate.substring(0, 4)
-
-//            val foundMovie = movies.find {it.id == movie?.id}
-//            val isClicked = movie?.isSaved
-//            if (isClicked != null) {
-//                foundMovie?.isSaved = isClicked
-//            }
-
-            if (movie?.isSaved!!) {
-                Glide.with(context).load(R.drawable.ic_bookmark).into(addToSaved)
-//                addToSaved.setImageResource(R.drawable.ic_bookmark)
-            } else {
-                Glide.with(context).load(R.drawable.ic_bookmark_filled).into(addToSaved)
-//                addToSaved.setImageResource(R.drawable.ic_bookmark_filled)
+            if (movie.position == 0) {
+                movie.position = moviePosition
+                moviePosition++
             }
 
-            Glide.with(context)
-                .load(movie!!.getPathToPoster())
-                .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+            Glide.with(itemView.context)
+                .load("https://image.tmdb.org/t/p/w342${movie.pathToPoster}")
                 .into(mainPoster)
 
-            view.setOnClickListener {
-                itemClickListener?.itemClick(movie)
-                val intent = Intent(view.context, MovieInfoActivity::class.java)
-                intent.putExtra("movie_id", movie.id)
-                view.context.startActivity(intent)
+            id = movie.id
+            movieId.text = movie.position.toString()
+            title.text = movie.title
+
+            if (movie.liked) {
+                btnSave.setImageResource(R.drawable.ic_bookmark)
+            } else {
+                btnSave.setImageResource(R.drawable.ic_bookmark_filled)
             }
 
-            addToSaved.setOnClickListener {
-                itemClickListener?.addToFavourites(movie)
-                if (movie.isSaved) {
-                    Glide.with(context).load(R.drawable.ic_bookmark_filled).into(addToSaved)
+            itemView.setOnClickListener {
+                itemClickListner?.itemClick(adapterPosition, movie)
+            }
+
+            btnSave.setOnClickListener {
+                itemClickListner?.addToFavourites(adapterPosition, movie)
+                val drawable: Drawable = btnSave.drawable
+                if (drawable.constantState?.equals(
+                        getDrawable(
+                            itemView.context,
+                            R.drawable.ic_bookmark_filled
+                        )?.constantState
+                    ) == true
+                ) {
+                    btnSave.setImageResource(R.drawable.ic_bookmark)
                 } else {
-                    Glide.with(context).load(R.drawable.ic_bookmark).into(addToSaved)
+                    btnSave.setImageResource(R.drawable.ic_bookmark_filled)
                 }
-//                movieInfoViewModel.likeMovie(!isSaved, movieId)
-//                refresh()
             }
         }
     }
 
-    inner class ProgressViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-    }
+    inner class LoaderViewHolder(view: View) : RecyclerView.ViewHolder(view)
 
     interface RecyclerViewItemClick {
-        fun itemClick(item: Movie)
-        fun addToFavourites(item: Movie)
+        fun itemClick(position: Int, item: Movie)
+        fun addToFavourites(position: Int, item: Movie)
     }
 }

@@ -16,12 +16,8 @@ class MovieRepositoryImpl(
         return movieDao.getAll()
     }
 
-    override fun getMovieInfoDB(id: Int): Movie {
+    override fun getMovieInfoDB(id: Int?): Movie {
         return movieDao.getMovieInfo(id)
-    }
-
-    override fun getFavoriteDB(): List<Movie> {
-        return movieDao.getFavorite();
     }
 
     override fun insertMoviesDB(movies: List<Movie>) {
@@ -32,22 +28,43 @@ class MovieRepositoryImpl(
         return movieDao.insertMovieInfo(movie)
     }
 
-    override fun updateMovieIsSaved(isSaved: Boolean, id: Int) {
-        return movieDao.updateMovieIsSaved(isSaved, id)
+//    override fun updateMovieIsSaved(isSaved: Boolean, id: Int) {
+//        return movieDao.updateMovieIsSaved(isSaved, id)
+//    }
+
+    override fun getLikedLocalDS(id: Int?): Int {
+        return movieDao.getLiked(id)
     }
 
-    override suspend fun getMoviesCoroutine(apiKey: String, page: Int): List<Movie>? =
-        movieApi.getPostApi().getMoviesCoroutine(apiKey, page).body()?.getResults()
+    override fun getAllLikedLocalDS(liked: Boolean): List<Movie> {
+        return movieDao.getFavorite(liked)
+    }
 
-    override suspend fun getMovieCoroutine(movieId: Int, apiKey: String): JsonObject? =
+    override fun setLikeLocalDS(liked: Boolean, id: Int?) {
+        return movieDao.setLike(liked, id)
+    }
+
+    override fun getIdOfflineLocalDS(liked: Boolean?): List<Int> {
+        return movieDao.getIdOffline(liked)
+    }
+
+    override fun getMovieOfflineLocalDS(liked: Boolean?): List<Movie> {
+        return movieDao.getMovieOffline(liked)
+    }
+
+
+    override suspend fun getMoviesCoroutine(apiKey: String, page: Int): List<Movie>? =
+        movieApi.getPostApi().getMoviesCoroutine(apiKey, page).body()?.results
+
+    override suspend fun getMovieCoroutine(movieId: Int?, apiKey: String): Movie? =
         movieApi.getPostApi().getMovieCoroutine(movieId, apiKey).body()
 
     override suspend fun getSavedMoviesCoroutine(
-        accountId: Int,
+        accountId: Int?,
         apiKey: String,
-        sessionId: String
+        sessionId: String?
     ): List<Movie>? =
-        movieApi.getPostApi().getSavedMoviesCoroutine(accountId, apiKey, sessionId).body()?.getResults()
+        movieApi.getPostApi().getSavedMoviesCoroutine(accountId, apiKey, sessionId).body()?.results
 
     override suspend fun addRemoveSavedCoroutine(accountId: Int?, apiKey: String, sessionId: String?, body: JsonObject): JsonObject? =
         movieApi.getPostApi().addRemoveSavedCoroutine(accountId, apiKey, sessionId, body).body()

@@ -1,6 +1,8 @@
 package com.example.movie_db.model.network
 
 import com.example.movie_db.BuildConfig
+import com.example.movie_db.model.data.authentication.TokenResponse
+import com.example.movie_db.model.data.movie.Movie
 import com.example.movie_db.model.data.movie.MovieResponse
 import com.google.gson.JsonObject
 import retrofit2.Response
@@ -20,6 +22,42 @@ object Retrofit {
 }
 
 interface PostApi {
+    // movie
+    @GET("movie/popular")
+    suspend fun getMoviesCoroutine(
+        @Query("api_key") apiKey: String,
+        @Query("page") page:Int
+    ): Response<MovieResponse>
+
+    @GET("movie/{movie_id}")
+    suspend fun getMovieCoroutine(
+        @Path("movie_id") movieId: Int?,
+        @Query("api_key") apiKey: String
+    ): Response<Movie>
+
+    @GET("account/{account_id}/favorite/movies")
+    suspend fun getSavedMoviesCoroutine(
+        @Path("account_id") id: Int?,
+        @Query("api_key") apiKey: String,
+        @Query("session_id") sessionId: String?
+    ): Response<MovieResponse>
+
+    @POST("account/{account_id}/favorite")
+    suspend fun addRemoveSavedCoroutine(
+        @Path("account_id") accountId: Int?,
+        @Query("api_key") apiKey: String,
+        @Query("session_id") sessionId: String?,
+        @Body body: JsonObject
+    ): Response<JsonObject>
+
+    @GET("movie/{movie_id}/account_states")
+    suspend fun isSavedCoroutine(
+        @Path("movie_id") movieId: Int?,
+        @Query("api_key") apiKey: String,
+        @Query("session_id") sessionId: String?
+    ): Response<JsonObject>
+
+
     //user
     @GET("authentication/token/new")
     suspend fun getTokenCoroutine(
@@ -38,41 +76,6 @@ interface PostApi {
         @Query("session_id") sessionId: String
     ): Response<JsonObject>
 
-    // movie
-    @GET("movie/popular")
-    suspend fun getMoviesCoroutine(
-        @Query("api_key") apiKey: String,
-        @Query("page") page:Int
-    ): Response<MovieResponse>
-
-    @GET("movie/{movie_id}")
-    suspend fun getMovieCoroutine(
-        @Path("movie_id") movieId: Int,
-        @Query("api_key") apiKey: String
-    ): Response<JsonObject>
-
-    @GET("account/{account_id}/favorite/movies")
-    suspend fun getSavedMoviesCoroutine(
-        @Path("account_id") id: Int,
-        @Query("api_key") apiKey: String,
-        @Query("session_id") sessionId: String
-    ): Response<MovieResponse>
-
-    @POST("account/{account_id}/favorite")
-    suspend fun addRemoveSavedCoroutine(
-        @Path("account_id") accountId: Int?,
-        @Query("api_key") apiKey: String,
-        @Query("session_id") sessionId: String?,
-        @Body body: JsonObject
-    ): Response<JsonObject>
-
-    @GET("movie/{movie_id}/account_states")
-    suspend fun isSavedCoroutine(
-        @Path("movie_id") movieId: Int?,
-        @Query("api_key") apiKey: String,
-        @Query("session_id") sessionId: String?
-    ): Response<JsonObject>
-
     @POST("authentication/session/new")
     suspend fun getSessionCoroutine(
         @Query("api_key") apiKey: String,
@@ -84,7 +87,6 @@ interface PostApi {
         path = "authentication/session",
         hasBody = true
     )
-
     suspend fun deleteSessionCoroutine(
         @Query("api_key") apiKey: String,
         @Body body: JsonObject

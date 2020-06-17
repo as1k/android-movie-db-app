@@ -1,6 +1,7 @@
 package com.example.movie_db.model.data.movie
 
 import androidx.room.Entity
+import androidx.room.Ignore
 import androidx.room.PrimaryKey
 import com.google.gson.annotations.SerializedName
 import java.io.Serializable
@@ -9,42 +10,34 @@ import java.io.Serializable
 data class Movie(
     @PrimaryKey
     @SerializedName("id")
-    var id: Int,
+    var id: Int = 0,
 
     @SerializedName("title")
-    var title: String? = null,
+    var title: String = "",
 
     @SerializedName("overview")
-    var review: String? = null,
+    var review: String = "",
 
     @SerializedName("release_date")
-    var releaseDate: String? = null,
+    var releaseDate: String = "",
 
     @SerializedName("popularity")
-    var popularity: Double? = null,
+    var popularity: Double = 0.0,
 
     @SerializedName("vote_average")
-    var voteRating: Double? = null,
+    var voteRating: Double = 0.0,
 
     @SerializedName("adultContent")
     var adultContent: Boolean = false,
 
     @SerializedName("backdrop_path")
-    private var pathToBackground: String? = null,
+    var pathToBackground: String = "",
 
     @SerializedName("poster_path")
-    private var pathToPoster: String? = null,
+    var pathToPoster: String = "",
 
-    @SerializedName("isSaved")
-    var isSaved: Boolean = false
+    var liked: Boolean = false,
 
-) : Serializable {
+    @Ignore var position: Int = 0
 
-    fun getPathToPoster(): String {
-        return "https://image.tmdb.org/t/p/w500$pathToPoster"
-    }
-
-    fun getPathToBackground(): String {
-        return "https://image.tmdb.org/t/p/w500$pathToBackground"
-    }
-}
+    ) : Serializable

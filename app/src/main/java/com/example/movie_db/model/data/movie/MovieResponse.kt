@@ -3,15 +3,16 @@ package com.example.movie_db.model.data.movie
 import com.example.movie_db.model.data.movie.Movie
 import com.google.gson.annotations.SerializedName
 
-class MovieResponse {
+data class MovieResponse (
+    @SerializedName("page")
+    val page: Int?,
 
     @SerializedName("results")
-    private val results: List<Movie>? = null
+    val results: List<Movie>,
 
-    @SerializedName("page")
-    private val page: Int = 1
+    @SerializedName("total_pages")
+    val totalPages: Int?,
 
-    fun getResults(): List<Movie>? {
-        return results
-    }
-}
+    @SerializedName("total_results")
+    val totalResults: Int?
+)

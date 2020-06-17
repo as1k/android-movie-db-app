@@ -1,6 +1,7 @@
 package com.example.movie_db.view.activities
 
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.viewpager.widget.PagerAdapter
@@ -16,12 +17,9 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var pager: MoviesViewPager
     private lateinit var pagerAdapter: PagerAdapter
-    private var fragment1: Fragment =
-        FragmentOne()
-    private var fragment2: Fragment =
-        FragmentSaved()
-    private var fragment3: Fragment =
-        FragmentProfile()
+    private var fragment1: Fragment = FragmentOne()
+    private var fragment2: Fragment = FragmentSaved()
+    private var fragment3: Fragment = FragmentProfile()
     private var fragmentList: MutableList<Fragment> = ArrayList()
     private lateinit var bottomNavView: BottomNavigationView
 
@@ -29,20 +27,24 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main_layout)
 
+        bindViews()
+        setFragment()
+    }
+
+    private fun bindViews() {
         bottomNavView = findViewById(R.id.bottom_navigation)
         fragmentList.add(fragment1)
         fragmentList.add(fragment2)
         fragmentList.add(fragment3)
         pager = findViewById(R.id.pager)
+
         pager.offscreenPageLimit = 3
         pager.setSwiping(false)
-        pagerAdapter = AdapterForPager(
-            supportFragmentManager,
-            fragmentList
-        )
-
+        pagerAdapter = AdapterForPager(supportFragmentManager, fragmentList)
         pager.adapter = pagerAdapter
+    }
 
+    private fun setFragment() {
         bottomNavView.setOnNavigationItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.home -> {
@@ -72,5 +74,10 @@ class MainActivity : AppCompatActivity() {
             }
             false
         }
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        bottomNavView.visibility = View.VISIBLE
     }
 }

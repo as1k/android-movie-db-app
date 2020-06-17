@@ -47,7 +47,7 @@
         android:paddingTop="56dp">
 
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-            android:id="@+id/main_content"
+            android:id="@+id/swipeInFragments"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@color/colorLight"

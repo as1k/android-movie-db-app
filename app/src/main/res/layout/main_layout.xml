@@ -18,12 +18,20 @@
         app:itemTextColor="@color/colorLight"
         app:menu="@menu/menu" />
 
-    <com.example.movie_db.view.adapters.MoviesViewPager
-        android:id="@+id/pager"
+    <FrameLayout
+        android:id="@+id/frameLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top"
-        android:layout_marginBottom="56dp"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+        android:layout_height="match_parent"
+        android:layout_gravity="top">
+
+        <com.example.movie_db.view.adapters.MoviesViewPager
+            android:id="@+id/pager"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:layout_marginBottom="56dp"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
+    </FrameLayout>
 </FrameLayout>
 
