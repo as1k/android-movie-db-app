@@ -12,11 +12,7 @@ import com.example.movie_db.R
 import com.example.movie_db.model.data.movie.Movie
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.lifecycle.Observer
-import com.example.movie_db.model.database.MovieDao
-import com.example.movie_db.model.database.MovieDatabase
-import com.example.movie_db.model.network.Retrofit
-import com.example.movie_db.model.repository.MovieRepository
-import com.example.movie_db.model.repository.MovieRepositoryImpl
+import com.example.movie_db.view.MoviesApplication
 import com.example.movie_db.view_model.MovieInfoViewModel
 import com.example.movie_db.view_model.SharedViewModel
 
@@ -61,9 +57,8 @@ class MovieInfoFragment : Fragment() {
     }
 
     private fun setViewModel() {
-        val movieDao: MovieDao = MovieDatabase.getDatabase(requireActivity()).movieDao()
-        val movieRepository: MovieRepository = MovieRepositoryImpl(Retrofit, movieDao)
-        movieInfoViewModel = MovieInfoViewModel(movieRepository)
+        val appContainer = (activity?.application as MoviesApplication).appContainer
+        movieInfoViewModel = appContainer.moviesViewModelFactory.createMovie()
     }
 
     private fun getMovieCoroutine(id: Int?) {

@@ -1,22 +1,22 @@
 package com.example.movie_db.model.repository
 
-import com.example.movie_db.model.network.Retrofit
+import com.example.movie_db.model.network.PostApi
 import com.google.gson.JsonObject
 
-class UserRepositoryImpl(private val movieApi : Retrofit): UserRepository {
+class UserRepositoryImpl(private val movieApi : PostApi): UserRepository {
 
     override suspend fun getTokenCoroutine(apiKey: String): JsonObject? =
-        movieApi.getPostApi().getTokenCoroutine(apiKey).body()
+        movieApi.getTokenCoroutine(apiKey).body()
 
     override suspend fun loginCoroutine(apiKey: String, body: JsonObject): JsonObject? =
-        movieApi.getPostApi().loginCoroutine(apiKey, body).body()
+        movieApi.loginCoroutine(apiKey, body).body()
 
     override suspend fun getCurrentAccountCoroutine(
         apiKey: String,
         sessionId: String
     ): JsonObject? =
-        movieApi.getPostApi().getCurrentAccountCoroutine(apiKey, sessionId).body()
+        movieApi.getCurrentAccountCoroutine(apiKey, sessionId).body()
 
     override suspend fun getSessionCoroutine(apiKey: String, body: JsonObject): JsonObject? =
-        movieApi.getPostApi().getSessionCoroutine(apiKey, body).body()
+        movieApi.getSessionCoroutine(apiKey, body).body()
 }

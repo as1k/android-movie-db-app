@@ -39,5 +39,4 @@ data class Movie(
     var liked: Boolean = false,
 
     @Ignore var position: Int = 0
-
-    ) : Serializable
+) : Serializable

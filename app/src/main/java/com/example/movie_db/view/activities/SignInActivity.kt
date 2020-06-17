@@ -14,9 +14,8 @@ import androidx.lifecycle.Observer
 import com.example.movie_db.R
 import com.example.movie_db.model.data.authentication.User
 import com.example.movie_db.model.data.authentication.UserResponse
-import com.example.movie_db.model.network.Retrofit
 import com.example.movie_db.model.repository.UserRepository
-import com.example.movie_db.model.repository.UserRepositoryImpl
+import com.example.movie_db.view.MoviesApplication
 import com.example.movie_db.view_model.AuthViewModel
 import com.google.gson.Gson
 
@@ -45,8 +44,9 @@ class SignInActivity : AppCompatActivity() {
     }
 
     private fun setData() {
-        userRepository = UserRepositoryImpl(Retrofit)
-        authViewModel = AuthViewModel(userRepository)
+        val appContainer = (application as MoviesApplication).appContainer
+        authViewModel = appContainer.moviesViewModelFactory.createUser()
+
         authViewModel.liveData.observe(this, Observer { result ->
             when (result) {
                 is AuthViewModel.State.ShowLoading -> {

@@ -13,13 +13,9 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.example.movie_db.R
 import com.example.movie_db.model.data.movie.Movie
 import androidx.lifecycle.Observer
-import com.example.movie_db.model.database.MovieDao
-import com.example.movie_db.model.database.MovieDatabase
-import com.example.movie_db.model.network.Retrofit
-import com.example.movie_db.model.repository.MovieRepositoryImpl
 import com.example.movie_db.view_model.MoviesViewModel
 import androidx.fragment.app.activityViewModels
-import com.example.movie_db.model.repository.MovieRepository
+import com.example.movie_db.view.MoviesApplication
 import com.example.movie_db.view.adapters.FavouritesAdapter
 import com.example.movie_db.view_model.SharedViewModel
 import kotlinx.android.synthetic.main.main_layout.*
@@ -76,9 +72,8 @@ class FragmentSaved : Fragment(), FavouritesAdapter.RecyclerViewItemClick {
     }
 
     private fun setViewModel() {
-        val movieDao: MovieDao = MovieDatabase.getDatabase(requireContext()).movieDao()
-        val movieRepository: MovieRepository = MovieRepositoryImpl(Retrofit, movieDao)
-        moviesViewModel = MoviesViewModel(movieRepository)
+        val appContainer = (activity?.application as MoviesApplication).appContainer
+        moviesViewModel = appContainer.moviesViewModelFactory.createMovieList()
     }
 
     private fun swipeRefresh() {

@@ -15,13 +15,9 @@ import com.example.movie_db.R
 import com.example.movie_db.model.data.movie.Movie
 import androidx.lifecycle.Observer
 import com.example.movie_db.utils.PaginationListener
-import com.example.movie_db.model.database.MovieDao
-import com.example.movie_db.model.database.MovieDatabase
-import com.example.movie_db.model.network.Retrofit
-import com.example.movie_db.model.repository.MovieRepositoryImpl
 import com.example.movie_db.view_model.MoviesViewModel
 import androidx.fragment.app.activityViewModels
-import com.example.movie_db.model.repository.MovieRepository
+import com.example.movie_db.view.MoviesApplication
 import com.example.movie_db.view_model.SharedViewModel
 import kotlinx.android.synthetic.main.main_layout.*
 
@@ -76,16 +72,11 @@ class FragmentOne : Fragment(), MoviesAdapter.RecyclerViewItemClick {
         toolbar.text = getString(R.string.movies)
         recView = view.findViewById(R.id.recycler_view)
         swipeRefreshLayout = view.findViewById(R.id.swipeInFragments)
-
-        val movieDao: MovieDao = MovieDatabase.getDatabase(requireContext()).movieDao()
-        val movieRepository = MovieRepositoryImpl(Retrofit, movieDao)
-        moviesViewModel = MoviesViewModel(movieRepository)
     }
 
     private fun setViewModels() {
-        val movieDao: MovieDao = MovieDatabase.getDatabase(requireContext()).movieDao()
-        val movieRepository: MovieRepository = MovieRepositoryImpl(Retrofit, movieDao)
-        moviesViewModel = MoviesViewModel(movieRepository)
+        val appContainer = (activity?.application as MoviesApplication).appContainer
+        moviesViewModel = appContainer.moviesViewModelFactory.createMovieList()
     }
 
     private fun setAdapter() {
@@ -158,41 +149,4 @@ class FragmentOne : Fragment(), MoviesAdapter.RecyclerViewItemClick {
         moviesViewModel.addToFavourites(item)
         sharedViewModel.setMovie(item)
     }
-
-
-//    private fun viewsOnInit() {
-//        movies = ArrayList()
-//        this.adapter = activity?.applicationContext?.let {
-//            MoviesAdapter(
-//                it
-//            )
-//        }!!
-//        layoutManager = GridLayoutManager(activity, 4)
-//        recView.layoutManager = layoutManager
-//        recView.itemAnimator = DefaultItemAnimator()
-//        recView.adapter = this.adapter
-//
-//        recView.addOnScrollListener(object : PaginationListener(layoutManager) {
-//            override fun loadMoreItems() {
-//                isLoading = true
-//                currentPage++
-//                moviesViewModel.getMovies(currentPage)
-//            }
-//
-//            override fun isLastPage(): Boolean = isLastPage
-//            override fun isLoading(): Boolean = isLoading
-//        })
-
-//        recView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-//            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-//                super.onScrolled(recyclerView, dx, dy)
-//                if (!recyclerView.canScrollVertically(RecyclerView.FOCUS_DOWN)) {
-//                    page++
-//                    moviesViewModel.getMovies(page)
-//                }
-//            }
-//        })
-//        this.adapter.notifyDataSetChanged()
-//    }
-
 }
