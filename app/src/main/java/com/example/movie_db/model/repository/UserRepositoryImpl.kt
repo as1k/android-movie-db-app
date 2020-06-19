@@ -1,9 +1,9 @@
 package com.example.movie_db.model.repository
 
-import com.example.movie_db.model.network.PostApi
+import com.example.movie_db.model.network.MovieApi
 import com.google.gson.JsonObject
 
-class UserRepositoryImpl(private val movieApi : PostApi): UserRepository {
+class UserRepositoryImpl(private val movieApi : MovieApi): UserRepository {
 
     override suspend fun getTokenCoroutine(apiKey: String): JsonObject? =
         movieApi.getTokenCoroutine(apiKey).body()
@@ -19,4 +19,7 @@ class UserRepositoryImpl(private val movieApi : PostApi): UserRepository {
 
     override suspend fun getSessionCoroutine(apiKey: String, body: JsonObject): JsonObject? =
         movieApi.getSessionCoroutine(apiKey, body).body()
+
+    override suspend fun deleteSessionCoroutine(apiKey: String, body: JsonObject): JsonObject? =
+        movieApi.deleteSessionCoroutine(apiKey, body).body()
 }

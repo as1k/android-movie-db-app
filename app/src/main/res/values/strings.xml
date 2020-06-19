@@ -5,4 +5,6 @@
     <string name="profile">Profile</string>
     <string name="adult_content">18+</string>
     <string name="not_adult_content">12+</string>
+    <string name="logout">Logout</string>
+    <string name="sobachka">\@</string>
 </resources>

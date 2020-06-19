@@ -2,11 +2,11 @@ package com.example.movie_db.model.repository
 
 import com.example.movie_db.model.data.movie.Movie
 import com.example.movie_db.model.database.MovieDao
-import com.example.movie_db.model.network.PostApi
+import com.example.movie_db.model.network.MovieApi
 import com.google.gson.JsonObject
 
 class MovieRepositoryImpl(
-    private val movieApi : PostApi,
+    private val movieApi : MovieApi,
     private var movieDao: MovieDao
 ): MovieRepository {
 

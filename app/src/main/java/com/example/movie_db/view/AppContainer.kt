@@ -1,19 +1,16 @@
 package com.example.movie_db.view
 
 import android.content.Context
-import android.content.SharedPreferences
 import com.example.movie_db.BuildConfig
-import com.example.movie_db.R
 import com.example.movie_db.model.database.MovieDao
 import com.example.movie_db.model.database.MovieDatabase
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import com.example.movie_db.model.network.PostApi
+import com.example.movie_db.model.network.MovieApi
 import com.example.movie_db.model.repository.MovieRepository
 import com.example.movie_db.model.repository.MovieRepositoryImpl
 import com.example.movie_db.model.repository.UserRepository
 import com.example.movie_db.model.repository.UserRepositoryImpl
-import com.example.movie_db.view.containers.LoginContainer
 
 class AppContainer private constructor(context: Context) {
     companion object {
@@ -30,12 +27,12 @@ class AppContainer private constructor(context: Context) {
     }
 
     private val movieDao: MovieDao = MovieDatabase.getDatabase(context).movieDao()
-    private val retrofit: PostApi by lazy {
+    private val retrofit: MovieApi by lazy {
         Retrofit.Builder()
             .baseUrl(BuildConfig.BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-            .create(PostApi::class.java)
+            .create(MovieApi::class.java)
     }
 
     private val movieRepository: MovieRepository by lazy {
