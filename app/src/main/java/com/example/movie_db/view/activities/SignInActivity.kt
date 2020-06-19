@@ -14,19 +14,17 @@ import androidx.lifecycle.Observer
 import com.example.movie_db.R
 import com.example.movie_db.model.data.authentication.User
 import com.example.movie_db.model.data.authentication.UserResponse
-import com.example.movie_db.model.repository.UserRepository
-import com.example.movie_db.view.MoviesApplication
 import com.example.movie_db.view_model.AuthViewModel
 import com.google.gson.Gson
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class SignInActivity : AppCompatActivity() {
 
-    private lateinit var userRepository: UserRepository
     private lateinit var login: EditText
     private lateinit var password: EditText
     private lateinit var loginBtn: Button
     private lateinit var progressBar: ProgressBar
-    private lateinit var authViewModel: AuthViewModel
+    private val authViewModel: AuthViewModel by viewModel<AuthViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,9 +42,6 @@ class SignInActivity : AppCompatActivity() {
     }
 
     private fun setData() {
-        val appContainer = (application as MoviesApplication).appContainer
-        authViewModel = appContainer.moviesViewModelFactory.createUser()
-
         authViewModel.liveData.observe(this, Observer { result ->
             when (result) {
                 is AuthViewModel.State.ShowLoading -> {
@@ -95,5 +90,4 @@ class SignInActivity : AppCompatActivity() {
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
     }
-
 }

@@ -33,9 +33,8 @@ class AuthViewModel(private var userRepository: UserRepository? = null) : ViewMo
     fun onLoggingIn(login: String, password: String) {
         launch {
             liveData.value = State.ShowLoading
-            val token = userRepository
-                    ?.getTokenCoroutine(BuildConfig.MOVIE_DB_API_KEY)
             try {
+                val token = userRepository?.getTokenCoroutine(BuildConfig.MOVIE_DB_API_KEY)
                 val newToken = Gson().fromJson(token, TokenResponse::class.java)
                 if (token != null) {
                     val request = newToken.requestToken

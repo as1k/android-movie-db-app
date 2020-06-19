@@ -76,32 +76,6 @@ class MovieInfoViewModel(private val movieRepository: MovieRepository) : ViewMod
         }
     }
 
-//    fun likeMovie(isFavorite: Boolean, movieId: Int) {
-//        launch {
-//            try {
-//                val body = JsonObject().apply {
-//                    addProperty("media_type", "movie")
-//                    addProperty("media_id", movieId)
-//                    addProperty("favorite", isFavorite)
-//                }
-//                movieRepository.addRemoveSavedCoroutine(
-//                    User.user?.userId,
-//                    BuildConfig.MOVIE_DB_API_KEY,
-//                    User.user?.sessionId,
-//                    body
-//                )
-//                val movie = movieRepository.getMovieInfoDB(movieId)
-//                movie.liked = !movie.liked
-//                movieRepository.insertMovieInfoDB(movie)
-//            } catch (e: Exception) {
-//                val movie = movieRepository.getMovieInfoDB(movieId)
-//                movie.liked = !movie.liked
-//                movieRepository.insertMovieInfoDB(movie)
-//                MovieInfoActivity.notSynced = true
-//            }
-//        }
-//    }
-
     fun isFavoriteMovie(movieId: Int?) {
         launch {
             val likeInt = withContext(Dispatchers.IO) {

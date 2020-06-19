@@ -17,9 +17,9 @@ import androidx.lifecycle.Observer
 import com.example.movie_db.utils.PaginationListener
 import com.example.movie_db.view_model.MoviesViewModel
 import androidx.fragment.app.activityViewModels
-import com.example.movie_db.view.MoviesApplication
 import com.example.movie_db.view_model.SharedViewModel
 import kotlinx.android.synthetic.main.main_layout.*
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class FragmentOne : Fragment(), MoviesAdapter.RecyclerViewItemClick {
 
@@ -27,7 +27,7 @@ class FragmentOne : Fragment(), MoviesAdapter.RecyclerViewItemClick {
     private lateinit var recView: RecyclerView
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
     private lateinit var toolbar: TextView
-    private lateinit var moviesViewModel: MoviesViewModel
+    private val moviesViewModel by viewModel<MoviesViewModel>()
     private lateinit var layoutManager: GridLayoutManager
 
     private var currentPage = PaginationListener.PAGE_START
@@ -53,7 +53,6 @@ class FragmentOne : Fragment(), MoviesAdapter.RecyclerViewItemClick {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setViewModels()
         bindView(view)
         refresh()
         setAdapter()
@@ -72,11 +71,6 @@ class FragmentOne : Fragment(), MoviesAdapter.RecyclerViewItemClick {
         toolbar.text = getString(R.string.movies)
         recView = view.findViewById(R.id.recycler_view)
         swipeRefreshLayout = view.findViewById(R.id.swipeInFragments)
-    }
-
-    private fun setViewModels() {
-        val appContainer = (activity?.application as MoviesApplication).appContainer
-        moviesViewModel = appContainer.moviesViewModelFactory.createMovieList()
     }
 
     private fun setAdapter() {

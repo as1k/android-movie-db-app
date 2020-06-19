@@ -6,31 +6,27 @@ import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import com.example.movie_db.R
 import com.example.movie_db.model.data.authentication.UserResponse
 import com.example.movie_db.model.data.authentication.User
 import com.example.movie_db.view_model.AuthViewModel
-import com.example.movie_db.view_model.ViewModelProviderFactory
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.lang.reflect.Type
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class Activator : AppCompatActivity() {
-    private lateinit var authViewModel: AuthViewModel
+    private val authViewModel: AuthViewModel by viewModel<AuthViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.sign_up_activity)
-        val viewModelProviderFactory = ViewModelProviderFactory(this)
 
-        authViewModel = ViewModelProvider(this, viewModelProviderFactory)
-            .get(AuthViewModel::class.java)
         authViewModel.liveData.observe(this, Observer { result ->
             when (result) {
                 is AuthViewModel.State.Result -> {
                     if (!result.isSuccess) {
-                        val intent = Intent(this@Activator, SignInActivity::class.java)
+                        val intent = Intent(this@Activator, MainActivity::class.java)
                         intent.flags =
                             Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                         startActivity(intent)
@@ -73,10 +69,7 @@ class Activator : AppCompatActivity() {
 
     private fun loginSuccess(user: UserResponse, session: String) {
         User.user = user
-        User.user!!.sessionId = session
+        User.user?.sessionId = session
         saveSession()
-        val intent = Intent(this, MainActivity::class.java)
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        startActivity(intent)
     }
 }

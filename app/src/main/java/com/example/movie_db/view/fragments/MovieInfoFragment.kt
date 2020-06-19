@@ -12,9 +12,9 @@ import com.example.movie_db.R
 import com.example.movie_db.model.data.movie.Movie
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.lifecycle.Observer
-import com.example.movie_db.view.MoviesApplication
 import com.example.movie_db.view_model.MovieInfoViewModel
 import com.example.movie_db.view_model.SharedViewModel
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MovieInfoFragment : Fragment() {
 
@@ -29,7 +29,7 @@ class MovieInfoFragment : Fragment() {
     private lateinit var back: ImageButton
 
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
-    private lateinit var movieInfoViewModel: MovieInfoViewModel
+    private val movieInfoViewModel by viewModel<MovieInfoViewModel>()
     private var movie: Movie? = null
     private var movieId: Int? = null
     private val sharedViewModel: SharedViewModel by activityViewModels()
@@ -52,13 +52,7 @@ class MovieInfoFragment : Fragment() {
 
         onBackPressed()
         refresh()
-        setViewModel()
         getMovieCoroutine(id = movieId!!)
-    }
-
-    private fun setViewModel() {
-        val appContainer = (activity?.application as MoviesApplication).appContainer
-        movieInfoViewModel = appContainer.moviesViewModelFactory.createMovie()
     }
 
     private fun getMovieCoroutine(id: Int?) {

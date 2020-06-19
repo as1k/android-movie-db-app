@@ -15,17 +15,17 @@ import com.example.movie_db.model.data.movie.Movie
 import androidx.lifecycle.Observer
 import com.example.movie_db.view_model.MoviesViewModel
 import androidx.fragment.app.activityViewModels
-import com.example.movie_db.view.MoviesApplication
 import com.example.movie_db.view.adapters.FavouritesAdapter
 import com.example.movie_db.view_model.SharedViewModel
 import kotlinx.android.synthetic.main.main_layout.*
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 
 class FragmentSaved : Fragment(), FavouritesAdapter.RecyclerViewItemClick {
 
     private lateinit var recViewFav: RecyclerView
     private lateinit var swipeRefreshLayoutFav: SwipeRefreshLayout
-    private lateinit var moviesViewModel: MoviesViewModel
+    private val moviesViewModel by viewModel<MoviesViewModel>()
     private lateinit var layoutManager: GridLayoutManager
     private val sharedViewModel: SharedViewModel by activityViewModels()
     private lateinit var toolbar: TextView
@@ -57,7 +57,6 @@ class FragmentSaved : Fragment(), FavouritesAdapter.RecyclerViewItemClick {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setViewModel()
         bindViews(view)
         swipeRefresh()
         setAdapter()
@@ -69,11 +68,6 @@ class FragmentSaved : Fragment(), FavouritesAdapter.RecyclerViewItemClick {
         recViewFav = view.findViewById(R.id.recycler_view)
         toolbar = view.findViewById(R.id.toolbar)
         toolbar.text = getString(R.string.favorites)
-    }
-
-    private fun setViewModel() {
-        val appContainer = (activity?.application as MoviesApplication).appContainer
-        moviesViewModel = appContainer.moviesViewModelFactory.createMovieList()
     }
 
     private fun swipeRefresh() {
