@@ -13,7 +13,7 @@ import com.bumptech.glide.Glide
 import com.example.movie_db.R
 import com.example.movie_db.model.data.movie.Movie
 
-class MoviesAdapter(
+class MovieListAdapter(
     private val itemClickListner: RecyclerViewItemClick? = null,
     val context: Context
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -23,13 +23,13 @@ class MoviesAdapter(
     private var isLoaderVisible = false
     private var moviePosition = 1
 
-    private var movies = listOf<Movie>()
+    private var movieList = listOf<Movie>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         return when (viewType) {
-            VIEW_TYPE_NORMAL -> MoviesViewHolder(
-                inflater.inflate(R.layout.skeleton, parent, false)
+            VIEW_TYPE_NORMAL -> MovieListViewHolder(
+                inflater.inflate(R.layout.movie_list_item, parent, false)
             )
             VIEW_TYPE_LOADING -> LoaderViewHolder(
                 inflater.inflate(R.layout.progress_layout, parent, false)
@@ -38,17 +38,17 @@ class MoviesAdapter(
         }
     }
 
-    override fun getItemCount(): Int = movies.size ?: 0
+    override fun getItemCount(): Int = movieList.size ?: 0
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        if (holder is MoviesViewHolder) {
-            return holder.bind(movies[position])
+        if (holder is MovieListViewHolder) {
+            return holder.bind(movieList[position])
         }
     }
 
     override fun getItemViewType(position: Int): Int {
         return if (isLoaderVisible) {
-            if (position == movies.size - 1) {
+            if (position == movieList.size - 1) {
                 VIEW_TYPE_LOADING
             } else {
                 VIEW_TYPE_NORMAL
@@ -58,55 +58,54 @@ class MoviesAdapter(
         }
     }
 
-    fun addFooterLoading() {
+    fun addLoadingProgressBar() {
         isLoaderVisible = true
-        (movies as? ArrayList<Movie>)?.add(Movie(id = -1))
-        notifyItemInserted(movies.size.minus(1))
+        (movieList as? ArrayList<Movie>)?.add(Movie(id = -1))
+        notifyItemInserted(movieList.size.minus(1))
     }
 
-    fun removeFooterLoading() {
+    fun removeLoadingProgressBar() {
         isLoaderVisible = false
-        val position = movies.size.minus(1)
-        if (movies.isNotEmpty()) {
+        val position = movieList.size.minus(1)
+        if (movieList.isNotEmpty()) {
             val item = getItem(position)
             if (item != null) {
-                (movies as? ArrayList<Movie>)?.removeAt(position)
+                (movieList as? ArrayList<Movie>)?.removeAt(position)
                 notifyItemRemoved(position)
             }
         }
-
     }
 
     private fun getItem(position: Int): Movie? {
-        return movies[position]
+        return movieList[position]
     }
 
     fun addItems(moviesList: List<Movie>) {
-        if (movies.isEmpty()) movies = moviesList
+        if (movieList.isEmpty()) movieList = moviesList
         else {
-            if (movies[movies.size - 1] != moviesList[moviesList.size - 1])
-                (movies as? ArrayList<Movie>)?.addAll(moviesList)
+            if (movieList[movieList.size - 1] != moviesList[moviesList.size - 1])
+                (movieList as? ArrayList<Movie>)?.addAll(moviesList)
         }
         notifyDataSetChanged()
     }
 
     fun updateItem(movie: Movie) {
-        val foundMovie = movies.find { it.id == movie.id }
+        val foundMovie = movieList.find { it.id == movie.id }
         foundMovie?.liked = movie.liked
         notifyDataSetChanged()
     }
 
     fun clearAll() {
-        (movies as? ArrayList<Movie>)?.clear()
+        (movieList as? ArrayList<Movie>)?.clear()
         moviePosition = 1
         notifyDataSetChanged()
     }
 
-    inner class MoviesViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    inner class MovieListViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val mainPoster: ImageView = itemView.findViewById(R.id.mainPoster)
         private val title: TextView = itemView.findViewById(R.id.title)
         private val movieId: TextView = itemView.findViewById(R.id.movieId)
-        private val btnSave: ImageView = itemView.findViewById(R.id.ivSave)
+        private val btnSave: ImageView = itemView.findViewById(R.id.iv_save)
         private var id: Int = 0
 
         fun bind(movie: Movie) {
@@ -117,7 +116,7 @@ class MoviesAdapter(
             }
 
             Glide.with(itemView.context)
-                .load("https://image.tmdb.org/t/p/w342${movie.pathToPoster}")
+                .load("https://image.tmdb.org/t/p/w342${movie.posterPath}")
                 .into(mainPoster)
 
             id = movie.id
@@ -125,9 +124,9 @@ class MoviesAdapter(
             title.text = movie.title
 
             if (movie.liked) {
-                btnSave.setImageResource(R.drawable.ic_bookmark)
+                btnSave.setImageResource(R.drawable.ic_bookmark_clicked)
             } else {
-                btnSave.setImageResource(R.drawable.ic_bookmark_filled)
+                btnSave.setImageResource(R.drawable.ic_bookmark_not_clicked)
             }
 
             itemView.setOnClickListener {
@@ -135,18 +134,18 @@ class MoviesAdapter(
             }
 
             btnSave.setOnClickListener {
-                itemClickListner?.addToFavourites(adapterPosition, movie)
+                itemClickListner?.like(adapterPosition, movie)
                 val drawable: Drawable = btnSave.drawable
                 if (drawable.constantState?.equals(
                         getDrawable(
                             itemView.context,
-                            R.drawable.ic_bookmark_filled
+                            R.drawable.ic_bookmark_not_clicked
                         )?.constantState
                     ) == true
                 ) {
-                    btnSave.setImageResource(R.drawable.ic_bookmark)
+                    btnSave.setImageResource(R.drawable.ic_bookmark_clicked)
                 } else {
-                    btnSave.setImageResource(R.drawable.ic_bookmark_filled)
+                    btnSave.setImageResource(R.drawable.ic_bookmark_not_clicked)
                 }
             }
         }
@@ -156,6 +155,6 @@ class MoviesAdapter(
 
     interface RecyclerViewItemClick {
         fun itemClick(position: Int, item: Movie)
-        fun addToFavourites(position: Int, item: Movie)
+        fun like(position: Int, item: Movie)
     }
 }

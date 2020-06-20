@@ -15,14 +15,12 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import com.bumptech.glide.Glide
 import com.example.movie_db.R
-import com.example.movie_db.model.data.authentication.User
-import com.example.movie_db.model.data.authentication.UserResponse
+import com.example.movie_db.model.data.authentication.CurrentUser
 import com.example.movie_db.view.activities.SignInActivity
 import com.example.movie_db.view_model.ProfileViewModel
-import kotlinx.android.synthetic.main.profile_fragment.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class FragmentProfile : Fragment() {
+class ProfileFragment : Fragment() {
 
     private val profileViewModel: ProfileViewModel by viewModel<ProfileViewModel>()
     private lateinit var progressBar: ProgressBar
@@ -36,20 +34,36 @@ class FragmentProfile : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val rootView: ViewGroup = inflater
-            .inflate(
-                R.layout.profile_fragment,
-                container, false
-            ) as ViewGroup
-        username = rootView.findViewById(R.id.profile_username)
-        name = rootView.findViewById(R.id.profile_name)
-        profilePhoto = rootView.findViewById(R.id.profilePhoto)
-        btnLogout = rootView.findViewById(R.id.btnLogout)
-        progressBar = rootView.findViewById(R.id.progressBarProfile)
+        return inflater.inflate(R.layout.profile_fragment, container, false)
+    }
 
-        username.text = User.user!!.userName
-        name.text = User.user!!.userId.toString()
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        bindViews(view)
+        setData()
+        getUser(view)
+    }
 
+    private fun bindViews(view: View) {
+        username = view.findViewById(R.id.profile_username)
+        name = view.findViewById(R.id.profile_name)
+        profilePhoto = view.findViewById(R.id.profilePhoto)
+        progressBar = view.findViewById(R.id.progressBarProfile)
+        btnLogout = view.findViewById(R.id.btnLogout)
+        btnLogout.setOnClickListener {
+            profileViewModel.logout(view)
+        }
+    }
+
+    private fun setData() {
+        username.text = CurrentUser.user!!.username
+        name.text = CurrentUser.user!!.userId.toString()
+        Glide.with(requireActivity())
+            .load("https://secure.gravatar.com/avatar/${CurrentUser.user!!.avatar.gravatar.hash}")
+            .into(profilePhoto)
+    }
+
+    private fun getUser(view: View) {
         profileViewModel.liveData.observe(viewLifecycleOwner, Observer { result ->
             when (result) {
                 is ProfileViewModel.State.ShowLoading -> {
@@ -60,12 +74,12 @@ class FragmentProfile : Fragment() {
                 }
                 is ProfileViewModel.State.Result -> {
                     if (result.isSuccess) {
-                        val savedUser: SharedPreferences = rootView.context.getSharedPreferences(
+                        val savedUser: SharedPreferences = view.context.getSharedPreferences(
                             "current_user",
                             Context.MODE_PRIVATE
                         )
                         savedUser.edit().remove("current_user").apply()
-                        val intent = Intent(rootView.context, SignInActivity::class.java)
+                        val intent = Intent(view.context, SignInActivity::class.java)
                         intent.flags =
                             Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                         startActivity(intent)
@@ -73,19 +87,5 @@ class FragmentProfile : Fragment() {
                 }
             }
         })
-
-        btnLogout.setOnClickListener {
-            profileViewModel.logout(rootView)
-        }
-
-        setData(User.user!!)
-
-        return rootView
-    }
-
-    private fun setData(user: UserResponse) {
-        Glide.with(requireActivity())
-            .load("https://secure.gravatar.com/avatar/${user.avatar.gravatar.hash}")
-            .into(profilePhoto)
     }
 }

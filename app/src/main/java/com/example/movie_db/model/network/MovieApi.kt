@@ -9,7 +9,7 @@ import retrofit2.http.*
 interface MovieApi {
     // movie
     @GET("movie/popular")
-    suspend fun getMoviesCoroutine(
+    suspend fun getMovieListCoroutine(
         @Query("api_key") apiKey: String,
         @Query("page") page:Int
     ): Response<MovieResponse>
@@ -21,14 +21,14 @@ interface MovieApi {
     ): Response<Movie>
 
     @GET("account/{account_id}/favorite/movies")
-    suspend fun getSavedMoviesCoroutine(
+    suspend fun getLikedMovieListCoroutine(
         @Path("account_id") id: Int?,
         @Query("api_key") apiKey: String,
         @Query("session_id") sessionId: String?
     ): Response<MovieResponse>
 
     @POST("account/{account_id}/favorite")
-    suspend fun addRemoveSavedCoroutine(
+    suspend fun likeUnlikeMoviesCoroutine(
         @Path("account_id") accountId: Int?,
         @Query("api_key") apiKey: String,
         @Query("session_id") sessionId: String?,
@@ -36,12 +36,11 @@ interface MovieApi {
     ): Response<JsonObject>
 
     @GET("movie/{movie_id}/account_states")
-    suspend fun isSavedCoroutine(
+    suspend fun isLikedCoroutine(
         @Path("movie_id") movieId: Int?,
         @Query("api_key") apiKey: String,
         @Query("session_id") sessionId: String?
     ): Response<JsonObject>
-
 
     //user
     @GET("authentication/token/new")
@@ -50,7 +49,7 @@ interface MovieApi {
     ): Response<JsonObject>
 
     @POST("authentication/token/validate_with_login")
-    suspend fun loginCoroutine(
+    suspend fun validateWithLoginCoroutine(
         @Query("api_key") apiKey: String,
         @Body body: JsonObject
     ): Response<JsonObject>
@@ -76,5 +75,4 @@ interface MovieApi {
         @Query("api_key") apiKey: String,
         @Body body: JsonObject
     ): Response<JsonObject>
-
 }

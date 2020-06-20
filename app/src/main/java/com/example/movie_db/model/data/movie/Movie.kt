@@ -16,7 +16,7 @@ data class Movie(
     var title: String = "",
 
     @SerializedName("overview")
-    var review: String = "",
+    var overview: String = "",
 
     @SerializedName("release_date")
     var releaseDate: String = "",
@@ -25,16 +25,16 @@ data class Movie(
     var popularity: Double = 0.0,
 
     @SerializedName("vote_average")
-    var voteRating: Double = 0.0,
+    var voteAverage: Double = 0.0,
 
-    @SerializedName("adultContent")
-    var adultContent: Boolean = false,
+    @SerializedName("include_adult")
+    var includeAdult: Boolean = false,
 
     @SerializedName("backdrop_path")
-    var pathToBackground: String = "",
+    var backdropPath: String = "",
 
     @SerializedName("poster_path")
-    var pathToPoster: String = "",
+    var posterPath: String = "",
 
     var liked: Boolean = false,
 

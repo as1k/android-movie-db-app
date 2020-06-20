@@ -1,6 +1,7 @@
-package com.example.movie_db
+package com.example.movie_db.di
 
 import android.content.Context
+import com.example.movie_db.BuildConfig
 import com.example.movie_db.model.database.MovieDao
 import com.example.movie_db.model.database.MovieDatabase
 import com.example.movie_db.model.network.MovieApi
@@ -10,7 +11,7 @@ import com.example.movie_db.model.repository.UserRepository
 import com.example.movie_db.model.repository.UserRepositoryImpl
 import com.example.movie_db.view_model.AuthViewModel
 import com.example.movie_db.view_model.MovieInfoViewModel
-import com.example.movie_db.view_model.MoviesViewModel
+import com.example.movie_db.view_model.MovieListViewModel
 import com.example.movie_db.view_model.ProfileViewModel
 import org.koin.dsl.module
 import retrofit2.Retrofit
@@ -34,10 +35,15 @@ val viewModelModule = module {
     viewModel { AuthViewModel(userRepository = get()) }
     viewModel { ProfileViewModel(userRepository = get()) }
     viewModel { MovieInfoViewModel(movieRepository = get()) }
-    viewModel { MoviesViewModel(movieRepository = get()) }
+    viewModel { MovieListViewModel(movieRepository = get()) }
 }
 
-val appModule = listOf(repositoryModule, storageModule, networkModule, viewModelModule)
+val appModule = listOf(
+    repositoryModule,
+    storageModule,
+    networkModule,
+    viewModelModule
+)
 
 private fun getMovieDao(context: Context): MovieDao { return MovieDatabase.getDatabase(context).movieDao() }
 

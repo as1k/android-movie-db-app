@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/backGray">
@@ -14,19 +13,20 @@
         android:textColor="@color/colorLight"
         android:fontFamily="@font/g_light"
         android:gravity="center_vertical"
-        android:paddingLeft="70dp"
-        android:text="Profile"
+        android:paddingStart="70dp"
+        android:paddingEnd="70dp"
+        android:text="@string/profile"
         android:textSize="20sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageButton
-        android:id="@+id/menunav"
+        android:id="@+id/menu_nav"
         android:layout_width="58dp"
         android:layout_height="58dp"
         android:background="@android:color/transparent"
-        android:src="@drawable/ic_menu_black_24dp"
+        android:src="@drawable/ic_menu"
         app:layout_constraintStart_toStartOf="@+id/toolbar"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -53,44 +53,79 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/toolbar" />
 
-    <TextView
-        android:id="@+id/profile_name"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/linear_user_id"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:fontFamily="@font/g_light"
-        android:text="Bruce Wayne"
-        android:textColor="@color/darkgray"
-        android:textSize="30sp"
-        app:layout_constraintEnd_toEndOf="@+id/profilePhoto"
-        app:layout_constraintStart_toStartOf="@+id/profilePhoto"
-        app:layout_constraintTop_toBottomOf="@+id/profilePhoto" />
+        android:orientation="horizontal"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/profilePhoto"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginStart="30dp"
+        android:layout_marginEnd="30dp">
+        <TextView
+            android:id="@+id/profile_idishka"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_weight="1"
+            android:textAlignment="viewEnd"
+            android:fontFamily="@font/g_light"
+            android:text="@string/user_id"
+            android:textColor="@color/dark_gray"
+            android:textSize="20sp"
+            android:paddingStart="5dp"
+            android:paddingEnd="5dp" />
 
-    <TextView
-        android:id="@+id/profile_sobachka"
-        android:layout_width="wrap_content"
+        <TextView
+            android:id="@+id/profile_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textAlignment="viewStart"
+            android:layout_marginTop="16dp"
+            android:fontFamily="@font/g_light"
+            android:text="@string/bruce_wayne"
+            android:textColor="@color/dark_gray"
+            android:textSize="20sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linear_username"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:fontFamily="@font/g_light"
-        android:text="@string/sobachka"
-        android:textColor="@color/darkgray"
-        android:textSize="15sp"
-        app:layout_constraintStart_toStartOf="@+id/profile_name"
-        app:layout_constraintTop_toBottomOf="@+id/profile_name" />
+        android:orientation="horizontal"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/linear_user_id"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginStart="30dp"
+        android:layout_marginEnd="30dp">
+        <TextView
+            android:id="@+id/profile_sobachka"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginTop="8dp"
+            android:fontFamily="@font/g_light"
+            android:text="@string/sobachka"
+            android:textAlignment="viewEnd"
+            android:textColor="@color/dark_gray"
+            android:textSize="15sp"
+            android:paddingStart="1dp"
+            android:paddingEnd="1dp"/>
 
-    <TextView
-        android:id="@+id/profile_username"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="2dp"
-        android:layout_marginTop="8dp"
-        android:fontFamily="@font/g_light"
-        android:text="batman"
-        android:textColor="@color/darkgray"
-        android:textSize="15sp"
-        app:layout_constraintStart_toEndOf="@+id/profile_sobachka"
-        app:layout_constraintTop_toBottomOf="@+id/profile_name" />
-
+        <TextView
+            android:id="@+id/profile_username"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginTop="8dp"
+            android:fontFamily="@font/g_light"
+            android:text="@string/batman"
+            android:textAlignment="viewStart"
+            android:textColor="@color/dark_gray"
+            android:textSize="15sp"/>
+    </LinearLayout>
     <Button
         android:id="@+id/btnLogout"
         android:layout_width="match_parent"
@@ -110,7 +145,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/profile_username" />
+        app:layout_constraintTop_toBottomOf="@+id/linear_username" />
 
     <ProgressBar
         android:id="@+id/progressBarProfile"

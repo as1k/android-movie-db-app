@@ -18,12 +18,12 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MovieInfoFragment : Fragment() {
 
-    private lateinit var imagePoster: ImageView
+    private lateinit var poster: ImageView
     private lateinit var title: TextView
-    private lateinit var review: TextView
+    private lateinit var overview: TextView
     private lateinit var releaseDate: TextView
     private lateinit var adultContent: TextView
-    private lateinit var rating: TextView
+    private lateinit var voteAverage: TextView
     private lateinit var popularity: TextView
     private lateinit var save: ImageButton
     private lateinit var back: ImageButton
@@ -55,6 +55,20 @@ class MovieInfoFragment : Fragment() {
         getMovieCoroutine(id = movieId!!)
     }
 
+    private fun bindViews(view: View) {
+        poster = view.findViewById(R.id.poster)
+        title = view.findViewById(R.id.title)
+        overview = view.findViewById(R.id.overview)
+        releaseDate = view.findViewById(R.id.release_date)
+        adultContent = view.findViewById(R.id.adult_content)
+        voteAverage = view.findViewById(R.id.vote_average)
+        popularity = view.findViewById(R.id.popularity)
+        save = view.findViewById(R.id.save)
+        back = view.findViewById(R.id.back)
+        swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout)
+    }
+
+
     private fun getMovieCoroutine(id: Int?) {
         movieInfoViewModel.getMovie(id)
         movieInfoViewModel.liveData.observe(requireActivity(), Observer { result ->
@@ -71,10 +85,10 @@ class MovieInfoFragment : Fragment() {
                 }
                 is MovieInfoViewModel.State.IsFavorite -> {
                     if (result.likeInt == 1 || result.likeInt == 11) {
-                        save.setImageResource(R.drawable.ic_bookmark)
+                        save.setImageResource(R.drawable.ic_bookmark_clicked)
                         movie?.liked = true
                     } else {
-                        save.setImageResource(R.drawable.ic_bookmark_filled)
+                        save.setImageResource(R.drawable.ic_bookmark_not_clicked)
                         movie?.liked = false
                     }
                 }
@@ -89,7 +103,7 @@ class MovieInfoFragment : Fragment() {
     }
 
     private fun isFavoriteMovie(id: Int) {
-        movieInfoViewModel.isFavoriteMovie(id)
+        movieInfoViewModel.isLikedMovie(id)
     }
 
     private fun likeMovie(movie: Movie) {
@@ -98,42 +112,29 @@ class MovieInfoFragment : Fragment() {
 
     private fun setData(movie: Movie) {
         Glide.with(this)
-            .load("https://image.tmdb.org/t/p/w342${movie.pathToBackground}")
-            .into(imagePoster)
+            .load("https://image.tmdb.org/t/p/w342${movie.backdropPath}")
+            .into(poster)
 
         title.text = movie.title
-        review.text = movie.review
+        overview.text = movie.overview
         releaseDate.text = movie.releaseDate
-        if (movie.adultContent)
+        if (movie.includeAdult)
             adultContent.text = getString(R.string.adult_content)
         else
             adultContent.text = getString(R.string.not_adult_content)
-        rating.text = movie.voteRating.toString()
+        voteAverage.text = movie.voteAverage.toString()
         popularity.text = movie.popularity.toString()
         isFavoriteMovie(movie.id)
 
         save.setOnClickListener {
             if (!movie.liked) {
-                save.setImageResource(R.drawable.ic_bookmark)
+                save.setImageResource(R.drawable.ic_bookmark_clicked)
             } else {
-                save.setImageResource(R.drawable.ic_bookmark_filled)
+                save.setImageResource(R.drawable.ic_bookmark_not_clicked)
             }
             likeMovie(movie)
             sharedViewModel.setMovie(movie)
         }
-    }
-
-    private fun bindViews(view: View) {
-        imagePoster = view.findViewById(R.id.poster)
-        title = view.findViewById(R.id.title)
-        review = view.findViewById(R.id.overview)
-        releaseDate = view.findViewById(R.id.releasedate)
-        adultContent = view.findViewById(R.id.adult)
-        rating = view.findViewById(R.id.rate)
-        popularity = view.findViewById(R.id.popularity)
-        save = view.findViewById(R.id.save)
-        back = view.findViewById(R.id.back)
-        swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout)
     }
 
     private fun onBackPressed() {
@@ -142,96 +143,3 @@ class MovieInfoFragment : Fragment() {
         }
     }
 }
-
-    ////////////////////////////////////////////
-
-//    override fun onCreate(savedInstanceState: Bundle?) {
-//        super.onCreate(savedInstanceState)
-//        setContentView(R.layout.movie_info_activity)
-//
-//        val movieDao: MovieDao = MovieDatabase.getDatabase(this).movieDao()
-//        movieInfoViewModel = MovieInfoViewModel(MovieRepositoryImpl(Retrofit, movieDao))
-//
-//        swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout)
-//        title = findViewById(R.id.title)
-//        review = findViewById(R.id.overview)
-//        imagePoster = findViewById(R.id.poster)
-//        releaseDate = findViewById(R.id.releasedate)
-//        adultContent = findViewById(R.id.adult)
-//        rating = findViewById(R.id.rate)
-//        popularity = findViewById(R.id.popularity)
-//        back = findViewById(R.id.back)
-//        save = findViewById(R.id.save)
-//        movieId = intent.getIntExtra("movie_id", 1)
-//        window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN
-//
-//        back.setOnClickListener {
-//            onBackPressed()
-//        }
-//
-//        swipeRefreshLayout.setOnRefreshListener {
-//            movieInfoViewModel.isFavoriteMovie(movieId)
-//            movieInfoViewModel.getMovie(movieId)
-//            observe()
-//        }
-//
-//        fun refresh() {
-//            movieInfoViewModel.isFavoriteMovie(movieId)
-//            movieInfoViewModel.getMovie(movieId)
-//            observe()
-//        }
-//
-//        save.setOnClickListener {
-//            if (isSaved) {
-//                Glide.with(this).load(R.drawable.ic_bookmark_filled).into(save)
-//            } else {
-//                Glide.with(this).load(R.drawable.ic_bookmark).into(save)
-//            }
-//            movieInfoViewModel.likeMovie(!isSaved, movieId)
-//            refresh()
-//        }
-//
-//        movieInfoViewModel.isFavoriteMovie(movieId)
-//        movieInfoViewModel.getMovie(movieId)
-//        observe()
-//    }
-//
-//    fun observe() {
-//        movieInfoViewModel.liveData.observe(this, Observer { result ->
-//            when (result) {
-//                is MovieInfoViewModel.State.ShowLoading -> {
-//                    swipeRefreshLayout.isRefreshing = true
-//                }
-//                is MovieInfoViewModel.State.HideLoading -> {
-//                    swipeRefreshLayout.isRefreshing = false
-//                }
-//                is MovieInfoViewModel.State.Result -> {
-//                    writeInViews(result.movie)
-//                }
-//                is MovieInfoViewModel.State.IsFavorite -> {
-//                    isSaved = result.isFavorite
-//                    if (isSaved) {
-//                        Glide.with(this).load(R.drawable.ic_bookmark).into(save)
-//                    } else {
-//                        Glide.with(this).load(R.drawable.ic_bookmark_filled).into(save)
-//                    }
-//                }
-//            }
-//        })
-//    }
-//
-//    fun writeInViews(movie: Movie) {
-//        review.text = movie.review
-//        Glide.with(this@MovieInfoActivity).load("https://image.tmdb.org/t/p/w342${movie.pathToBackground}")
-//            .into(imagePoster)
-//        title.text = movie.title
-//        releaseDate.text = movie.releaseDate
-//        if (movie.adultContent)
-//            adultContent.text = "18+"
-//        else
-//            adultContent.text = "12+"
-//        rating.text = movie.voteRating.toString()
-//        popularity.text = movie.popularity.toString()
-//    }
-//
-//}

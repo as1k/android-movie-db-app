@@ -5,19 +5,19 @@ import com.google.gson.JsonObject
 
 interface MovieRepository {
     // local
-    fun insertMoviesDB(movies: List<Movie>)
-    fun insertMovieInfoDB(movie: Movie)
-    fun getMoviesDB(): List<Movie>
-    fun getMovieInfoDB(id: Int?): Movie
-    fun getLikedDB(id: Int?): Int
-    fun getAllLikedDB(liked: Boolean): List<Movie>
-    fun setLikeDB(liked: Boolean, id: Int?)
-    fun getLikedMovieIdDB(liked: Boolean?): List<Int>
+    fun insertMovieListLocal(movies: List<Movie>)
+    fun insertMovieInfoLocal(movie: Movie)
+    fun getMovieListLocal(): List<Movie>
+    fun getMovieInfoByIdLocal(id: Int?): Movie
+    fun checkIsLikedByIdLocal(id: Int?): Int
+    fun getLikedMoviesLocal(liked: Boolean): List<Movie>
+    fun setLikeStatusByIdLocal(liked: Boolean, id: Int?)
+    fun getLikedMoviesIdLocal(liked: Boolean?): List<Int>
 
     // remote
-    suspend fun getMoviesCoroutine(apiKey: String, page: Int) : List<Movie>?
-    suspend fun getMovieCoroutine(movieId: Int?, apiKey: String): Movie?
-    suspend fun getSavedMoviesCoroutine(accountId: Int?, apiKey: String, sessionId: String?): List<Movie>?
-    suspend fun addRemoveSavedCoroutine(accountId: Int?, apiKey: String, sessionId: String?, body: JsonObject): JsonObject?
-    suspend fun isSavedCoroutine(movieId: Int?, apiKey: String, sessionId: String?): JsonObject?
+    suspend fun getMovieListRemote(apiKey: String, page: Int) : List<Movie>?
+    suspend fun getMovieRemote(movieId: Int?, apiKey: String): Movie?
+    suspend fun getLikedMovieListRemote(accountId: Int?, apiKey: String, sessionId: String?): List<Movie>?
+    suspend fun likeUnlikeMoviesCoroutineRemote(accountId: Int?, apiKey: String, sessionId: String?, body: JsonObject): JsonObject?
+    suspend fun isLikedRemote(movieId: Int?, apiKey: String, sessionId: String?): JsonObject?
 }

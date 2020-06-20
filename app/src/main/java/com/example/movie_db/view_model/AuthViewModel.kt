@@ -1,12 +1,10 @@
 package com.example.movie_db.view_model
 
-import android.content.Context
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.movie_db.BuildConfig
 import com.example.movie_db.model.data.authentication.LoginResponse
 import com.example.movie_db.model.data.authentication.SessionResponse
-import com.example.movie_db.model.data.authentication.TokenResponse
 import com.example.movie_db.model.data.authentication.UserResponse
 import com.example.movie_db.model.repository.UserRepository
 import com.google.gson.Gson
@@ -30,12 +28,12 @@ class AuthViewModel(private var userRepository: UserRepository? = null) : ViewMo
         job.cancel()
     }
 
-    fun onLoggingIn(login: String, password: String) {
+    fun getToken(login: String, password: String) {
         launch {
             liveData.value = State.ShowLoading
             try {
-                val token = userRepository?.getTokenCoroutine(BuildConfig.MOVIE_DB_API_KEY)
-                val newToken = Gson().fromJson(token, TokenResponse::class.java)
+                val token = userRepository?.getTokenRemote(BuildConfig.MOVIE_DB_API_KEY)
+                val newToken = Gson().fromJson(token, LoginResponse::class.java)
                 if (token != null) {
                     val request = newToken.requestToken
                     val body = JsonObject().apply {
@@ -43,7 +41,7 @@ class AuthViewModel(private var userRepository: UserRepository? = null) : ViewMo
                         addProperty("password", password)
                         addProperty("request_token", request)
                     }
-                    getLoginResponse(body)
+                    validateWithLogin(body)
                 }
             } catch (e: Exception) {
                 liveData.value = State.Result(false)
@@ -51,11 +49,11 @@ class AuthViewModel(private var userRepository: UserRepository? = null) : ViewMo
         }
     }
 
-    private fun getLoginResponse(body: JsonObject) {
+    private fun validateWithLogin(body: JsonObject) {
         launch {
             try {
                 val response = userRepository
-                    ?.loginCoroutine(BuildConfig.MOVIE_DB_API_KEY, body)
+                    ?.validateWithLoginRemote(BuildConfig.MOVIE_DB_API_KEY, body)
 
                 val loginResponse = Gson().fromJson(response, LoginResponse::class.java)
                 if (loginResponse != null) {
@@ -77,11 +75,11 @@ class AuthViewModel(private var userRepository: UserRepository? = null) : ViewMo
         launch {
             try {
                 val response = userRepository
-                    ?.getSessionCoroutine(BuildConfig.MOVIE_DB_API_KEY, body)
+                    ?.getSessionRemote(BuildConfig.MOVIE_DB_API_KEY, body)
                 val session = Gson().fromJson(response, SessionResponse::class.java)
                 if (session != null) {
                     val sessionId = session.sessionId
-                    getAccount(sessionId)
+                    getCurrentAccount(sessionId)
                 }
             } catch (e: Exception) {
                 liveData.value = State.Result(false)
@@ -89,11 +87,11 @@ class AuthViewModel(private var userRepository: UserRepository? = null) : ViewMo
         }
     }
 
-    fun getAccount(session: String) {
+    fun getCurrentAccount(session: String) {
         launch {
             try {
                 val response = userRepository
-                    ?.getCurrentAccountCoroutine(BuildConfig.MOVIE_DB_API_KEY, session)
+                    ?.getCurrentAccountRemote(BuildConfig.MOVIE_DB_API_KEY, session)
                 val account = Gson().fromJson(response, UserResponse::class.java)
                 if (account != null)
                     liveData.value = State.Account(account, session)
@@ -107,8 +105,7 @@ class AuthViewModel(private var userRepository: UserRepository? = null) : ViewMo
     sealed class State {
         object ShowLoading : State()
         object HideLoading : State()
-        data class Result(val isSuccess: Boolean) : State()
+        data class Result(val isSuccessful: Boolean) : State()
         data class Account(val user: UserResponse, val session: String) : State()
     }
-
 }

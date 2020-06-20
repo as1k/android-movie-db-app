@@ -1,7 +1,7 @@
-package com.example.movie_db.view
+package com.example.movie_db
 
 import android.app.Application
-import com.example.movie_db.appModule
+import com.example.movie_db.di.appModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 

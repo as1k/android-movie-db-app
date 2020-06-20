@@ -10,24 +10,24 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.example.movie_db.view.adapters.MoviesAdapter
+import com.example.movie_db.view.adapters.MovieListAdapter
 import com.example.movie_db.R
 import com.example.movie_db.model.data.movie.Movie
 import androidx.lifecycle.Observer
-import com.example.movie_db.utils.PaginationListener
-import com.example.movie_db.view_model.MoviesViewModel
+import com.example.movie_db.model.utils.PaginationListener
+import com.example.movie_db.view_model.MovieListViewModel
 import androidx.fragment.app.activityViewModels
 import com.example.movie_db.view_model.SharedViewModel
-import kotlinx.android.synthetic.main.main_layout.*
+import kotlinx.android.synthetic.main.main_menu_layout.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class FragmentOne : Fragment(), MoviesAdapter.RecyclerViewItemClick {
+class PopularMoviesFragment : Fragment(), MovieListAdapter.RecyclerViewItemClick {
 
-    private lateinit var adapter: MoviesAdapter
+    private lateinit var adapter: MovieListAdapter
     private lateinit var recView: RecyclerView
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
     private lateinit var toolbar: TextView
-    private val moviesViewModel by viewModel<MoviesViewModel>()
+    private val movieListViewModel by viewModel<MovieListViewModel>()
     private lateinit var layoutManager: GridLayoutManager
 
     private var currentPage = PaginationListener.PAGE_START
@@ -48,12 +48,12 @@ class FragmentOne : Fragment(), MoviesAdapter.RecyclerViewItemClick {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragments_activity, container, false)
+        return inflater.inflate(R.layout.main_menu_decor, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        bindView(view)
+        bindViews(view)
         refresh()
         setAdapter()
         getMovies(currentPage)
@@ -66,7 +66,7 @@ class FragmentOne : Fragment(), MoviesAdapter.RecyclerViewItemClick {
         swipeRefreshLayout.isRefreshing = false
     }
 
-    private fun bindView(view: View) {
+    private fun bindViews(view: View) {
         toolbar = view.findViewById(R.id.toolbar)
         toolbar.text = getString(R.string.movies)
         recView = view.findViewById(R.id.recycler_view)
@@ -76,7 +76,7 @@ class FragmentOne : Fragment(), MoviesAdapter.RecyclerViewItemClick {
     private fun setAdapter() {
         layoutManager = GridLayoutManager(requireActivity(), 3)
         recView.layoutManager = layoutManager
-        adapter = MoviesAdapter(this, requireActivity())
+        adapter = MovieListAdapter(this, requireActivity())
         recView.adapter = adapter
 
         recView.addOnScrollListener(object : PaginationListener(layoutManager) {
@@ -87,7 +87,6 @@ class FragmentOne : Fragment(), MoviesAdapter.RecyclerViewItemClick {
             }
 
             override fun isLastPage(): Boolean = isLastPage
-
             override fun isLoading(): Boolean = isLoading
         })
     }
@@ -99,24 +98,24 @@ class FragmentOne : Fragment(), MoviesAdapter.RecyclerViewItemClick {
             itemCount = 0
             currentPage= PaginationListener.PAGE_START
             isLastPage = false
-            moviesViewModel.getMovies(currentPage)
+            movieListViewModel.getPopularMovieList(currentPage)
         }
     }
 
     private fun getMovies(page: Int) {
-        moviesViewModel.getMovies(page)
-        moviesViewModel.liveData.observe(viewLifecycleOwner, Observer { result ->
+        movieListViewModel.getPopularMovieList(page)
+        movieListViewModel.liveData.observe(viewLifecycleOwner, Observer { result ->
             when (result) {
-                is MoviesViewModel.State.ShowLoading -> {
+                is MovieListViewModel.State.ShowLoading -> {
                     swipeRefreshLayout.isRefreshing = true
                 }
-                is MoviesViewModel.State.HideLoading -> {
+                is MovieListViewModel.State.HideLoading -> {
                     swipeRefreshLayout.isRefreshing = false
                 }
-                is MoviesViewModel.State.Result -> {
-                    adapter.removeFooterLoading()
+                is MovieListViewModel.State.Result -> {
+                    adapter.removeLoadingProgressBar()
                     adapter.addItems(result.list!!)
-                    adapter.addFooterLoading()
+                    adapter.addLoadingProgressBar()
                     isLoading = false
                 }
             }
@@ -124,12 +123,6 @@ class FragmentOne : Fragment(), MoviesAdapter.RecyclerViewItemClick {
     }
 
     override fun itemClick(position: Int, item: Movie) {
-//        val intent = Intent(context, MovieInfoActivity::class.java).also {
-//            it.putExtra("id", item.id)
-//            it.putExtra("pos", position)
-//        }
-//        context?.startActivity(intent)
-
         val bundle = Bundle()
         bundle.putInt("id", item.id)
         val movieInfoFragment =
@@ -139,8 +132,8 @@ class FragmentOne : Fragment(), MoviesAdapter.RecyclerViewItemClick {
         requireActivity().bottom_navigation.visibility = View.GONE
     }
 
-    override fun addToFavourites(position: Int, item: Movie) {
-        moviesViewModel.addToFavourites(item)
+    override fun like(position: Int, item: Movie) {
+        movieListViewModel.addToFavourites(item)
         sharedViewModel.setMovie(item)
     }
 }
