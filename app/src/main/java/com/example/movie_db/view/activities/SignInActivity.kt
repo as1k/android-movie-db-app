@@ -4,11 +4,9 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.util.Log
 import android.view.View
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ProgressBar
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import com.example.movie_db.R
@@ -17,6 +15,7 @@ import com.example.movie_db.model.data.authentication.UserResponse
 import com.example.movie_db.view_model.AuthViewModel
 import com.google.gson.Gson
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import java.lang.Exception
 
 class SignInActivity : AppCompatActivity() {
 
@@ -24,6 +23,7 @@ class SignInActivity : AppCompatActivity() {
     private lateinit var password: EditText
     private lateinit var btnLogin: Button
     private lateinit var progressBar: ProgressBar
+    private lateinit var signUpTextView: TextView
     private val authViewModel: AuthViewModel by viewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,6 +38,7 @@ class SignInActivity : AppCompatActivity() {
         password = findViewById(R.id.et_password)
         btnLogin = findViewById(R.id.btn_login)
         progressBar = findViewById(R.id.progress_bar)
+        signUpTextView = findViewById(R.id.tv_link_sign_up)
         progressBar.visibility = View.GONE
     }
 
@@ -61,11 +62,26 @@ class SignInActivity : AppCompatActivity() {
         })
 
         btnLogin.setOnClickListener {
-            authViewModel.getToken(
-                username.text.toString(),
-                password.text.toString()
-            )
-            progressBar.visibility = View.VISIBLE
+            if(username.text.toString() != "" && password.text.toString() != "") {
+                authViewModel.getToken(
+                    username.text.toString(),
+                    password.text.toString()
+                )
+                progressBar.visibility = View.VISIBLE
+            }
+            else {
+                Toast.makeText(this@SignInActivity, "Fill all blanks", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        signUpTextView.setOnClickListener {
+            try {
+                val intent = Intent(this, SignUpActivity::class.java)
+                startActivity(intent)
+            }
+            catch (e: Exception) {
+                Log.d("my_debug", e.toString())
+            }
         }
     }
 

@@ -274,50 +274,42 @@ class MovieListAdapter(
     }
 
     inner class MoviesViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val mainPoster: ImageView = itemView.findViewById(R.id.mainPoster)
-        private val title: TextView = itemView.findViewById(R.id.title)
-        private val movieId: TextView = itemView.findViewById(R.id.movieId)
-        private val btnSave: ImageView = itemView.findViewById(R.id.iv_save)
-        private var id: Int = 0
-
         fun bind(movie: Movie) {
+            val mainPoster: ImageView = itemView.findViewById(R.id.mainPoster)
+            val title: TextView = itemView.findViewById(R.id.title)
+            val movieId: TextView = itemView.findViewById(R.id.movieId)
+            val btnSave: ImageView = itemView.findViewById(R.id.iv_save)
 
-            if (movie.position == 0) {
-                movie.position = moviePosition
-                moviePosition++
-            }
+            if (movie != null) {
+                if (movie.position == 0) {
+                    movie.position = moviePosition
+                    moviePosition++
+                }
 
-            Glide.with(itemView.context)
-                .load("https://image.tmdb.org/t/p/w342${movie.posterPath}")
-                .into(mainPoster)
+                Glide.with(itemView.context)
+                    .load("https://image.tmdb.org/t/p/w342${movie.posterPath}")
+                    .into(mainPoster)
 
-            id = movie.id
-            movieId.text = movie.position.toString()
-            title.text = movie.title
+                movieId.text = movie.position.toString()
+                title.text = movie.title
 
-            if (movie.liked) {
-                btnSave.setImageResource(R.drawable.ic_bookmark_clicked)
-            } else {
-                btnSave.setImageResource(R.drawable.ic_bookmark_not_clicked)
-            }
-
-            itemView.setOnClickListener {
-                itemClickListener?.itemClick(adapterPosition, movie)
-            }
-
-            btnSave.setOnClickListener {
-                itemClickListener?.addToFavourites(adapterPosition, movie)
-                val drawable: Drawable = btnSave.drawable
-                if (drawable.constantState?.equals(
-                        getDrawable(
-                            itemView.context,
-                            R.drawable.ic_bookmark_not_clicked
-                        )?.constantState
-                    ) == true
-                ) {
+                if (movie.liked) {
                     btnSave.setImageResource(R.drawable.ic_bookmark_clicked)
                 } else {
                     btnSave.setImageResource(R.drawable.ic_bookmark_not_clicked)
+                }
+
+                itemView.setOnClickListener {
+                    itemClickListener?.itemClick(adapterPosition, movie)
+                }
+
+                btnSave.setOnClickListener {
+                    itemClickListener?.addToFavourites(adapterPosition, movie)
+                    if (movie.liked) {
+                        btnSave.setImageResource(R.drawable.ic_bookmark_clicked)
+                    } else {
+                        btnSave.setImageResource(R.drawable.ic_bookmark_not_clicked)
+                    }
                 }
             }
         }

@@ -1,5 +1,6 @@
 package com.example.movie_db.model.repository
 
+import android.util.Log
 import com.example.movie_db.model.data.movie.Movie
 import com.example.movie_db.model.database.MovieDao
 import com.example.movie_db.model.network.MovieApi
@@ -37,6 +38,7 @@ class MovieRepositoryImpl(
     }
 
     override fun setLikeStatusByIdLocal(liked: Boolean, id: Int?) {
+        Log.d("my_debug", "movierepository impl setLikeStatusByIdLocal occured")
         return movieDao.setLikeStatusById(liked, id)
     }
 

@@ -24,8 +24,9 @@
         <activity
             android:name=".view.activities.MainActivity"/>
         <activity
-            android:name=".view.activities.SignInActivity">
-        </activity>
+            android:name=".view.activities.SignInActivity"/>
+        <activity
+            android:name=".view.activities.SignUpActivity"/>
     </application>
 
 

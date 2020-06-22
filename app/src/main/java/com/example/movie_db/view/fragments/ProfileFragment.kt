@@ -84,6 +84,17 @@ class ProfileFragment : Fragment() {
                             Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                         startActivity(intent)
                     }
+                    else {
+                        val savedUser: SharedPreferences = view.context.getSharedPreferences(
+                            "current_user",
+                            Context.MODE_PRIVATE
+                        )
+                        savedUser.edit().remove("current_user").apply()
+                        val intent = Intent(view.context, SignInActivity::class.java)
+                        intent.flags =
+                            Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        startActivity(intent)
+                    }
                 }
             }
         })

@@ -20,7 +20,7 @@ class Activator : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.sign_up_activity)
+//        setContentView(R.layout.sign_up_activity)
 
         authViewModel.liveData.observe(this, Observer { result ->
             when (result) {

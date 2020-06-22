@@ -7,7 +7,9 @@ import com.example.movie_db.BuildConfig
 import com.example.movie_db.model.data.movie.Movie
 import com.example.movie_db.model.data.authentication.CurrentUser
 import com.example.movie_db.model.repository.MovieRepository
+import com.google.gson.Gson
 import com.google.gson.JsonObject
+import kotlinx.android.synthetic.main.movie_list_item.view.*
 import kotlinx.coroutines.*
 import java.lang.Exception
 import kotlin.coroutines.CoroutineContext
@@ -108,6 +110,8 @@ class MovieListViewModel(
             }
             updateFavourite(body)
             movieRepository.insertMovieInfoLocal(movie)
+            movieRepository.setLikeStatusByIdLocal(movie.liked, movie.id)
+            Log.d("my_debug", "viewmodel addToFavourites occured")
         }
         catch (e: Exception) {
             Log.d("my_debug", e.toString())
