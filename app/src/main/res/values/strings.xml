@@ -1,4 +1,27 @@
 <resources>
-    <string name="app_name">movie-db</string>
+    <string name="app_name">BatFilms</string>
     <string name="movies">Movies</string>
+    <string name="favorites">Favorites</string>
+    <string name="adult_content">18+</string>
+    <string name="not_adult_content">12+</string>
+    <string name="logout">Logout</string>
+    <string name="sobachka">username: @</string>
+    <string name="user_id">User id:</string>
+    <string name="batman">batman</string>
+    <string name="bruce_wayne">Bruce Wayne</string>
+    <string name="hd">HD</string>
+    <string name="_1">1</string>
+    <string name="popular">Popular</string>
+    <string name="favourite">Favourite</string>
+    <string name="profile">Profile</string>
+    <string name="release_on">Release On</string>
+    <string name="age_limit">Age limit:</string>
+    <string name="rating">Rating:</string>
+    <string name="popularity">Popularity:</string>
+    <string name="username">Username</string>
+    <string name="forgot_password">Forgot Password?</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="new_user">New User?</string>
+    <string name="sign_in">SIGNIN</string>
+    <string name="password">Password</string>
 </resources>

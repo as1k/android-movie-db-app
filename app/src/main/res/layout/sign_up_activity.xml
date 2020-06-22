@@ -80,7 +80,7 @@
             android:layout_marginTop="10dp"
             android:cursorVisible="true"
             android:fontFamily="@font/g_light"
-            android:hint="Email"
+            android:hint="Username"
             android:padding="10dp"
             android:textColor="@color/textGray"
             android:textColorHint="#bababa"
