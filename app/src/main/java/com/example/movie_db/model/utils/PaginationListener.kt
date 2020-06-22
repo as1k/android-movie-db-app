@@ -1,8 +1,7 @@
-package com.example.movie_db.utils
+package com.example.movie_db.model.utils
 
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-
 
 abstract class PaginationListener(
     var layoutManager: LinearLayoutManager
@@ -31,6 +30,6 @@ abstract class PaginationListener(
     }
 
     protected abstract fun loadMoreItems()
-    abstract fun isLastPage(): Boolean
-    abstract fun isLoading(): Boolean
+    protected abstract fun isLastPage(): Boolean
+    protected abstract fun isLoading(): Boolean
 }

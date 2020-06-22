@@ -1,54 +1,68 @@
 package com.example.movie_db.model.repository
 
+import android.util.Log
 import com.example.movie_db.model.data.movie.Movie
-import com.example.movie_db.model.data.movie.MovieResponse
 import com.example.movie_db.model.database.MovieDao
-import com.example.movie_db.model.network.Retrofit
-import com.example.movie_db.model.repository.MovieRepository
+import com.example.movie_db.model.network.MovieApi
 import com.google.gson.JsonObject
 
 class MovieRepositoryImpl(
-    private val movieApi : Retrofit,
+    private val movieApi : MovieApi,
     private var movieDao: MovieDao
 ): MovieRepository {
 
-    override fun getMoviesDB(): List<Movie> {
+    // local
+    override fun getMovieListLocal(): List<Movie> {
         return movieDao.getAll()
     }
 
-    override fun getMovieInfoDB(id: Int): Movie {
-        return movieDao.getMovieInfo(id)
+    override fun getMovieInfoByIdLocal(id: Int?): Movie {
+        return movieDao.getMovieInfoById(id)
     }
 
-    override fun getFavoriteDB(): List<Movie> {
-        return movieDao.getFavorite();
-    }
-
-    override fun insertMoviesDB(movies: List<Movie>) {
+    override fun insertMovieListLocal(movies: List<Movie>) {
         return movieDao.insertAll(movies)
     }
 
-    override fun insertMovieInfoDB(movie: Movie) {
+    override fun insertMovieInfoLocal(movie: Movie) {
         return movieDao.insertMovieInfo(movie)
     }
 
+    //favorite movies
+    override fun checkIsLikedByIdLocal(id: Int?): Int {
+        return movieDao.checkIsLikedById(id)
+    }
 
-    override suspend fun getMoviesCoroutine(apiKey: String, page: Int): List<Movie>? =
-        movieApi.getPostApi().getMoviesCoroutine(apiKey, page).body()?.getResults()
+    override fun getLikedMoviesLocal(liked: Boolean): List<Movie> {
+        return movieDao.getLikedMovies(liked)
+    }
 
-    override suspend fun getMovieCoroutine(movieId: Int, apiKey: String): JsonObject? =
-        movieApi.getPostApi().getMovieCoroutine(movieId, apiKey).body()
+    override fun setLikeStatusByIdLocal(liked: Boolean, id: Int?) {
+        Log.d("my_debug", "movierepository impl setLikeStatusByIdLocal occured")
+        return movieDao.setLikeStatusById(liked, id)
+    }
 
-    override suspend fun getSavedMoviesCoroutine(
-        accountId: Int,
+    override fun getLikedMoviesIdLocal(liked: Boolean?): List<Int> {
+        return movieDao.getLikedMoviesId(liked)
+    }
+
+    // remote
+    override suspend fun getMovieListRemote(apiKey: String, page: Int): List<Movie>? =
+        movieApi.getMovieListCoroutine(apiKey, page).body()?.results
+
+    override suspend fun getMovieRemote(movieId: Int?, apiKey: String): Movie? =
+        movieApi.getMovieCoroutine(movieId, apiKey).body()
+
+    override suspend fun getLikedMovieListRemote(
+        accountId: Int?,
         apiKey: String,
-        sessionId: String
+        sessionId: String?
     ): List<Movie>? =
-        movieApi.getPostApi().getSavedMoviesCoroutine(accountId, apiKey, sessionId).body()?.getResults()
+        movieApi.getLikedMovieListCoroutine(accountId, apiKey, sessionId).body()?.results
 
-    override suspend fun addRemoveSavedCoroutine(accountId: Int?, apiKey: String, sessionId: String?, body: JsonObject): JsonObject? =
-        movieApi.getPostApi().addRemoveSavedCoroutine(accountId, apiKey, sessionId, body).body()
+    override suspend fun likeUnlikeMoviesCoroutineRemote(accountId: Int?, apiKey: String, sessionId: String?, body: JsonObject): JsonObject? =
+        movieApi.likeUnlikeMoviesCoroutine(accountId, apiKey, sessionId, body).body()
 
-    override suspend fun isSavedCoroutine(movieId: Int?, apiKey: String, sessionId: String?): JsonObject? =
-        movieApi.getPostApi().isSavedCoroutine(movieId, apiKey, sessionId).body()
+    override suspend fun isLikedRemote(movieId: Int?, apiKey: String, sessionId: String?): JsonObject? =
+        movieApi.isLikedCoroutine(movieId, apiKey, sessionId).body()
 }

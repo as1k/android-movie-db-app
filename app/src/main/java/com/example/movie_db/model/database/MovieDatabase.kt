@@ -6,23 +6,23 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.movie_db.model.data.movie.Movie
 
-@Database(entities = [Movie::class], version = 1, exportSchema = false)
+@Database(entities = [Movie::class], version = 1)
 abstract class MovieDatabase : RoomDatabase() {
-
     abstract fun movieDao(): MovieDao
 
     companion object {
-        var INSTANCE: MovieDatabase? = null
+        var database: MovieDatabase? = null
+        private const val databaseName: String = "movie_database3.db"
         fun getDatabase(context: Context): MovieDatabase {
-            if (INSTANCE == null) {
-                INSTANCE = Room.databaseBuilder(
+            if (database == null) {
+                database = Room.databaseBuilder(
                     context.applicationContext,
                     MovieDatabase::class.java,
-                    "app_database3.db"
+                    databaseName
                 ).allowMainThreadQueries()
                     .build()
             }
-            return INSTANCE!!
+            return database!!
         }
     }
 }

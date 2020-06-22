@@ -10,11 +10,24 @@ data class UserResponse (
     val userId: Int? = null,
 
     @SerializedName("username")
-    val userName: String? = null,
+    val username: String? = null,
 
     @SerializedName("name")
     val name: String? = null,
 
     @SerializedName("include_adult")
-    val adultContentAllowed: Boolean? = null
+    val adultContentAllowed: Boolean? = null,
+
+    @SerializedName("avatar")
+    val avatar: Avatar
+)
+
+data class Avatar(
+    @SerializedName("gravatar")
+    val gravatar: Gravatar
+)
+
+data class Gravatar(
+    @SerializedName("hash")
+    val hash: String
 )

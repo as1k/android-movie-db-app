@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName
 
 data class SessionResponse (
     @SerializedName("success")
-    val isSuccess: Boolean,
+    val isSuccessful: Boolean,
 
     @SerializedName("session_id")
     val sessionId: String

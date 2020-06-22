@@ -1,13 +1,13 @@
 package com.example.movie_db.view_model
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.movie_db.BuildConfig
-import com.example.movie_db.model.data.authentication.User
+import com.example.movie_db.model.data.authentication.CurrentUser
 import com.example.movie_db.model.data.movie.Movie
-import com.example.movie_db.model.data.movie.SavingResponse
+import com.example.movie_db.model.data.movie.FavouriteResponse
 import com.example.movie_db.model.repository.MovieRepository
-import com.example.movie_db.view.activities.MovieInfoActivity
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import kotlinx.coroutines.CoroutineScope
@@ -16,8 +16,10 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.lang.Exception
 import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.*
 
-class MovieInfoViewModel(private val movieRepository: MovieRepository) : ViewModel(), CoroutineScope {
+class MovieInfoViewModel(private val movieRepository: MovieRepository) : ViewModel(),
+    CoroutineScope {
     private val job = Job()
     var liveData = MutableLiveData<State>()
 
@@ -29,82 +31,89 @@ class MovieInfoViewModel(private val movieRepository: MovieRepository) : ViewMod
         job.cancel()
     }
 
-    fun getMovie(movieId: Int) {
+    fun getMovie(movieId: Int?) {
+        liveData.value = State.ShowLoading
         launch {
-            liveData.value = State.ShowLoading
-            var movie: Movie
-            try {
-                val movieInfo = movieRepository
-                    .getMovieCoroutine(movieId, BuildConfig.MOVIE_DB_API_KEY)
-                if (movieInfo != null) {
-                    val result = Gson().fromJson(movieInfo, Movie::class.java)
-                    movie = result
-                } else {
-                    movieRepository.getMovieInfoDB(movieId)
-                    movie = movieRepository?.getMovieInfoDB(movieId)
+            val movie = withContext(Dispatchers.IO) {
+                try {
+                    val response = movieRepository
+                        .getMovieRemote(movieId, BuildConfig.MOVIE_DB_API_KEY)
+                    if (response != null) {
+                        if (response.liked) {
+                            movieRepository.setLikeStatusByIdLocal(true, response.id)
+                        }
+                    }
+                    response
+                } catch (e: Exception) {
+                    movieRepository.getMovieInfoByIdLocal(movieId)
                 }
-            } catch (e: Exception) {
-                movieRepository.getMovieInfoDB(movieId)
-                movie = movieRepository.getMovieInfoDB(movieId)
             }
             liveData.value = State.HideLoading
             liveData.value = State.Result(movie)
         }
     }
 
-    fun likeMovie(isFavorite: Boolean, movieId: Int) {
-        launch {
-            try {
-                val body = JsonObject().apply {
-                    addProperty("media_type", "movie")
-                    addProperty("media_id", movieId)
-                    addProperty("favorite", isFavorite)
-                }
-                movieRepository.addRemoveSavedCoroutine(
-                    User.user?.userId,
-                    BuildConfig.MOVIE_DB_API_KEY,
-                    User.user?.sessionId,
-                    body
-                )
-                val movie = movieRepository.getMovieInfoDB(movieId)
-                movie.isSaved = !movie.isSaved
-                movieRepository.insertMovieInfoDB(movie)
-            } catch (e: Exception) {
-                val movie = movieRepository.getMovieInfoDB(movieId)
-                movie.isSaved = !movie.isSaved
-                movieRepository.insertMovieInfoDB(movie)
-                MovieInfoActivity.notSynced = true
+    fun likeMovie(movie: Movie) {
+        try {
+            movie.liked = !movie.liked
+            val body = JsonObject().apply {
+                addProperty("media_type", "movie")
+                addProperty("media_id", movie.id)
+                addProperty("favorite", movie.liked)
             }
+            likeUnlikeMovies(body)
+            movieRepository.insertMovieInfoLocal(movie)
+        } catch (e: Exception) {
+            Log.d("my_debug", e.toString())
         }
     }
 
-    fun isFavoriteMovie(movieId: Int) {
+    private fun likeUnlikeMovies(body: JsonObject) {
         launch {
             try {
-                val isSavedMovie = movieRepository.isSavedCoroutine(
-                    movieId,
+                movieRepository.likeUnlikeMoviesCoroutineRemote(
+                    CurrentUser.user?.userId,
                     BuildConfig.MOVIE_DB_API_KEY,
-                    User.user?.sessionId
+                    CurrentUser.user?.sessionId,
+                    body
                 )
-                if (isSavedMovie != null) {
-                    val like = Gson().fromJson(
-                        isSavedMovie,
-                        SavingResponse::class.java
-                    ).favorite
-                    liveData.value = State.IsFavorite(like)
-                }
-            } catch (e: Exception) {
-                val movie = movieRepository.getMovieInfoDB(movieId)
-                liveData.value = State.IsFavorite(movie.isSaved)
-            }
+            } catch (e: Exception) { }
         }
     }
+
+    fun isLikedMovie(movieId: Int?) {
+        launch {
+            val likeInt = withContext(Dispatchers.IO) {
+                try {
+                    val response = movieRepository.isLikedRemote(
+                        movieId,
+                        BuildConfig.MOVIE_DB_API_KEY,
+                        CurrentUser.user?.sessionId
+                    )
+                    val like = Gson().fromJson(
+                        response,
+                        FavouriteResponse::class.java
+                    ).favorite
+                    if (like) {
+                        movieRepository.setLikeStatusByIdLocal(true, movieId)
+                        1
+                    } else {
+                        movieRepository.setLikeStatusByIdLocal(false, movieId)
+                        0
+                    }
+                } catch (e: Exception) {
+                    movieRepository.checkIsLikedByIdLocal(movieId)
+                }
+            }
+            liveData.value = State.IsFavorite(likeInt)
+        }
+    }
+
 
     sealed class State {
         object ShowLoading : State()
         object HideLoading : State()
-        data class Result(val movie: Movie) : State()
-        data class IsFavorite(val isFavorite: Boolean) : State()
+        data class Result(val movie: Movie?) : State()
+        data class IsFavorite(val likeInt: Int?) : State()
     }
-
 }

@@ -2,7 +2,7 @@ package com.example.movie_db.model.data.movie
 
 import com.google.gson.annotations.SerializedName
 
-data class SavingResponse (
+data class FavouriteResponse (
     @SerializedName("id")
     val id: Int,
 

@@ -11,9 +11,9 @@
     <color name="backGray">#fafafa</color>
     <color name="textGray">#888888</color>
     <color name="white">#ffffff</color>
-    <color name="darkestgray">#383838</color>
-    <color name="brightestgray">#909090</color>
-    <color name="darkgray">#505050</color>
+    <color name="darkest_gray">#383838</color>
+    <color name="brightest_gray">#909090</color>
+    <color name="dark_gray">#505050</color>
     <color name="gray">#787878</color>
     <color name="greenBright">#20dfaf</color>
     <color name="black">#000</color>

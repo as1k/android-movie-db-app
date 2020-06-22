@@ -16,7 +16,7 @@
                 android:background="@color/colorLight"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                tools:context=".view.activities.MovieInfoActivity">
+                tools:context=".view.fragments.MovieInfoFragment">
 
             <ScrollView
                 android:id="@+id/scrollView2"
@@ -54,11 +54,11 @@
                         android:layout_marginTop="30dp"
                         android:layout_marginEnd="20dp"
                         android:layout_marginRight="20dp"
-                        android:gravity="left"
+                        android:gravity="start"
                         android:textColor="@android:color/black"
                         android:textStyle="bold"
                         android:fontFamily="@font/g_light"
-                        android:textSize="20dp"
+                        android:textSize="20sp"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/poster" />
@@ -88,7 +88,7 @@
                         android:layout_marginTop="8dp"
                         android:fontFamily="@font/g_light"
                         android:gravity="center_vertical"
-                        android:text="Release On"
+                        android:text="@string/release_on"
                         android:textColor="@color/textGray"
                         android:textSize="16sp"
                         android:textStyle="bold"
@@ -96,7 +96,7 @@
                         app:layout_constraintTop_toBottomOf="@+id/overview" />
 
                     <TextView
-                        android:id="@+id/releasedate"
+                        android:id="@+id/release_date"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="150dp"
@@ -113,9 +113,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="20dp"
-                        android:layout_marginLeft="20dp"
                         android:gravity="center_vertical"
-                        android:text="Age limit:"
+                        android:text="@string/age_limit"
                         android:fontFamily="@font/g_light"
                         android:textColor="@color/textGray"
                         android:textSize="16sp"
@@ -124,26 +123,24 @@
                         app:layout_constraintTop_toBottomOf="@+id/line1" />
 
                     <TextView
-                        android:id="@+id/adult"
+                        android:id="@+id/adult_content"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="150dp"
-                        android:layout_marginLeft="150dp"
                         android:gravity="center_vertical"
                         android:fontFamily="@font/g_light"
                         android:textSize="16sp"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/releasedate" />
+                        app:layout_constraintTop_toBottomOf="@+id/release_date" />
 
                     <TextView
                         android:id="@+id/line4"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="20dp"
-                        android:layout_marginLeft="20dp"
                         android:gravity="center_vertical"
                         android:fontFamily="@font/g_light"
-                        android:text="Rating:"
+                        android:text="@string/rating"
                         android:textColor="@color/textGray"
                         android:textSize="16sp"
                         android:textStyle="bold"
@@ -151,25 +148,23 @@
                         app:layout_constraintTop_toBottomOf="@+id/line2" />
 
                     <TextView
-                        android:id="@+id/rate"
+                        android:id="@+id/vote_average"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="150dp"
-                        android:layout_marginLeft="150dp"
                         android:gravity="center_vertical"
                         android:fontFamily="@font/g_light"
                         android:textSize="16sp"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/adult" />
+                        app:layout_constraintTop_toBottomOf="@+id/adult_content" />
 
                     <TextView
                         android:id="@+id/line5"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="20dp"
-                        android:layout_marginLeft="20dp"
                         android:gravity="center_vertical"
-                        android:text="Popularity:"
+                        android:text="@string/popularity"
                         android:textColor="@color/textGray"
                         android:fontFamily="@font/g_light"
                         android:textSize="16sp"
@@ -197,7 +192,7 @@
                         android:gravity="center_vertical"
                         android:textSize="16sp"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/rate" />
+                        app:layout_constraintTop_toBottomOf="@+id/vote_average" />
 
                     <ImageButton
                         android:id="@+id/back"
