@@ -1,5 +1,6 @@
 package com.example.movie_db.view_model
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.movie_db.BuildConfig
@@ -31,28 +32,38 @@ class MovieListViewModel(
             if (page == 1) liveData.value = State.ShowLoading
             val list = withContext(Dispatchers.IO) {
                 try {
-                    val response = movieRepository.getMovieListRemote(BuildConfig.MOVIE_DB_API_KEY, page)
+                    val response = movieRepository
+                        .getMovieListRemote(BuildConfig.MOVIE_DB_API_KEY, page)
+                    Log.d("my_debug", "movie list viewmodel getpopmovies response:")
                     val favResponse = movieRepository.getLikedMovieListRemote(
                         CurrentUser.user?.userId,
                         BuildConfig.MOVIE_DB_API_KEY,
                         CurrentUser.user?.sessionId
                     )
+                    Log.d("my_debug", "movie list viewmodel getfavmovies response:")
                     if (!response.isNullOrEmpty()) {
+                        Log.d("my_debug", "Bug is here!!")
                         movieRepository.insertMovieListLocal(response)
                     }
                     if (!response.isNullOrEmpty()) {
-                        for (movie in response) {
-                            for (favorite in favResponse!!) {
-                                if(movie.id == favorite.id) {
-                                    movie.liked = true
-                                    movieRepository.setLikeStatusByIdLocal(true, movie.id)
+                        Log.d("my_debug", "Getting response" + response[5].toString())
+                        Log.d("my_debug", favResponse?.get(5).toString())
+
+                        for (popular in response) {
+                            for (favourite in favResponse!!) {
+                                if(popular.id == favourite.id) {
+                                    popular.liked = true
+                                    movieRepository.setLikeStatusByIdLocal(true, popular.id)
                                 }
                             }
                         }
                     }
                     response
                 } catch (e: Exception) {
-                    movieRepository.getMovieListLocal()
+
+                    Log.d("my_debug", e.toString())
+                    Log.d("my_debug", "movie list viewmodel getmovielistlocal")
+                    movieRepository.getMovieListLocal() ?: emptyList()
                 }
             }
             liveData.value = State.HideLoading
@@ -60,9 +71,10 @@ class MovieListViewModel(
         }
     }
 
-    fun getLikedMovieList() {
+    fun getLikedMovieList(){
         launch {
             liveData.value = State.ShowLoading
+
             val list = withContext(Dispatchers.IO) {
                 try {
                     val response = movieRepository.getLikedMovieListRemote(
@@ -71,9 +83,9 @@ class MovieListViewModel(
                         CurrentUser.user?.sessionId
                     )
                     if (!response.isNullOrEmpty()) {
-                        for (m in response) {
-                            m.liked = true
-                            movieRepository.setLikeStatusByIdLocal(true, m.id)
+                        for (favourite in response) {
+                            favourite.liked = true
+                            movieRepository.setLikeStatusByIdLocal(true, favourite.id)
                         }
                     }
                     response
@@ -87,14 +99,19 @@ class MovieListViewModel(
     }
 
     fun addToFavourites(movie: Movie) {
-        movie.liked = !movie.liked
-        val body = JsonObject().apply {
-            addProperty("media_type", "movie")
-            addProperty("media_id", movie.id)
-            addProperty("favorite", movie.liked)
+        try {
+            movie.liked = !movie.liked
+            val body = JsonObject().apply {
+                addProperty("media_type", "movie")
+                addProperty("media_id", movie.id)
+                addProperty("favorite", movie.liked)
+            }
+            updateFavourite(body)
+            movieRepository.insertMovieInfoLocal(movie)
         }
-        updateFavourite(body)
-        movieRepository.insertMovieInfoLocal(movie)
+        catch (e: Exception) {
+            Log.d("my_debug", e.toString())
+        }
     }
 
     private fun updateFavourite(body: JsonObject) {

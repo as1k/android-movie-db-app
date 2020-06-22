@@ -26,7 +26,7 @@ class Activator : AppCompatActivity() {
             when (result) {
                 is AuthViewModel.State.Result -> {
                     if (!result.isSuccessful) {
-                        val intent = Intent(this@Activator, MainActivity::class.java)
+                        val intent = Intent(this@Activator, SignInActivity::class.java)
                         intent.flags =
                             Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                         startActivity(intent)

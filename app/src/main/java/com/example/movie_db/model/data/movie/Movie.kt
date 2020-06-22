@@ -31,7 +31,7 @@ data class Movie(
     var includeAdult: Boolean = false,
 
     @SerializedName("backdrop_path")
-    var backdropPath: String = "",
+    var backdropPath: String? = null,
 
     @SerializedName("poster_path")
     var posterPath: String = "",

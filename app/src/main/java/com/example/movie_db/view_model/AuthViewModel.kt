@@ -59,8 +59,7 @@ class AuthViewModel(private var userRepository: UserRepository? = null) : ViewMo
                 if (loginResponse != null) {
                     val newBody = JsonObject().apply {
                         addProperty(
-                            "request_token",
-                            loginResponse.requestToken.toString()
+                            "request_token", loginResponse.requestToken.toString()
                         )
                     }
                     getSession(newBody)

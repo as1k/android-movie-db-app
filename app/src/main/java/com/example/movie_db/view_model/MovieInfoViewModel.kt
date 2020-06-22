@@ -1,5 +1,6 @@
 package com.example.movie_db.view_model
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.movie_db.BuildConfig
@@ -53,14 +54,18 @@ class MovieInfoViewModel(private val movieRepository: MovieRepository) : ViewMod
     }
 
     fun likeMovie(movie: Movie) {
-        movie.liked = !movie.liked
-        val body = JsonObject().apply {
-            addProperty("media_type", "movie")
-            addProperty("media_id", movie.id)
-            addProperty("favorite", movie.liked)
+        try {
+            movie.liked = !movie.liked
+            val body = JsonObject().apply {
+                addProperty("media_type", "movie")
+                addProperty("media_id", movie.id)
+                addProperty("favorite", movie.liked)
+            }
+            likeUnlikeMovies(body)
+            movieRepository.insertMovieInfoLocal(movie)
+        } catch (e: Exception) {
+            Log.d("my_debug", e.toString())
         }
-        likeUnlikeMovies(body)
-        movieRepository.insertMovieInfoLocal(movie)
     }
 
     private fun likeUnlikeMovies(body: JsonObject) {

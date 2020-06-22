@@ -1,6 +1,7 @@
 package com.example.movie_db.view.fragments
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,7 +20,7 @@ import com.example.movie_db.view_model.MovieListViewModel
 import androidx.fragment.app.activityViewModels
 import com.example.movie_db.view_model.SharedViewModel
 import kotlinx.android.synthetic.main.main_menu_layout.*
-import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.android.ext.android.inject
 
 class PopularMoviesFragment : Fragment(), MovieListAdapter.RecyclerViewItemClick {
 
@@ -27,7 +28,7 @@ class PopularMoviesFragment : Fragment(), MovieListAdapter.RecyclerViewItemClick
     private lateinit var recView: RecyclerView
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
     private lateinit var toolbar: TextView
-    private val movieListViewModel by viewModel<MovieListViewModel>()
+    private val movieListViewModel: MovieListViewModel by inject()
     private lateinit var layoutManager: GridLayoutManager
 
     private var currentPage = PaginationListener.PAGE_START
@@ -38,6 +39,8 @@ class PopularMoviesFragment : Fragment(), MovieListAdapter.RecyclerViewItemClick
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+        Log.d("my_debug", "popular movies fragment onActivityCreated")
+
         sharedViewModel.savedMovies.observe(requireActivity(), Observer { item ->
             adapter.updateItem(item)
         })
@@ -48,25 +51,24 @@ class PopularMoviesFragment : Fragment(), MovieListAdapter.RecyclerViewItemClick
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        Log.d("my_debug", "popular movies fragment onCreateView")
+
         return inflater.inflate(R.layout.main_menu_decor, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        Log.d("my_debug", "popular movies fragment onViewCreated")
+
         bindViews(view)
         refresh()
         setAdapter()
         getMovies(currentPage)
     }
 
-    override fun onResume() {
-        super.onResume()
-        swipeRefreshLayout.isRefreshing = true
-        requireActivity().bottom_navigation.visibility = View.VISIBLE
-        swipeRefreshLayout.isRefreshing = false
-    }
-
     private fun bindViews(view: View) {
+        Log.d("my_debug", "popular movies fragment bindViews")
+
         toolbar = view.findViewById(R.id.toolbar)
         toolbar.text = getString(R.string.movies)
         recView = view.findViewById(R.id.recycler_view)
@@ -74,6 +76,7 @@ class PopularMoviesFragment : Fragment(), MovieListAdapter.RecyclerViewItemClick
     }
 
     private fun setAdapter() {
+        Log.d("my_debug", "popular movies fragment setAdapter")
         layoutManager = GridLayoutManager(requireActivity(), 3)
         recView.layoutManager = layoutManager
         adapter = MovieListAdapter(this, requireActivity())
@@ -92,7 +95,7 @@ class PopularMoviesFragment : Fragment(), MovieListAdapter.RecyclerViewItemClick
     }
 
     private fun refresh() {
-        recView.layoutManager = LinearLayoutManager(requireActivity())
+        Log.d("my_debug", "popular movies fragment refresh")
         swipeRefreshLayout.setOnRefreshListener {
             adapter.clearAll()
             itemCount = 0
@@ -103,6 +106,8 @@ class PopularMoviesFragment : Fragment(), MovieListAdapter.RecyclerViewItemClick
     }
 
     private fun getMovies(page: Int) {
+        Log.d("my_debug", "popular movies fragment getMovies:")
+
         movieListViewModel.getPopularMovieList(page)
         movieListViewModel.liveData.observe(viewLifecycleOwner, Observer { result ->
             when (result) {
@@ -113,9 +118,9 @@ class PopularMoviesFragment : Fragment(), MovieListAdapter.RecyclerViewItemClick
                     swipeRefreshLayout.isRefreshing = false
                 }
                 is MovieListViewModel.State.Result -> {
-                    adapter.removeLoadingProgressBar()
-                    adapter.addItems(result.list!!)
-                    adapter.addLoadingProgressBar()
+                    adapter?.removeFooterLoading()
+                    adapter?.addItems(result.list!!)
+                    adapter?.addFooterLoading()
                     isLoading = false
                 }
             }
@@ -125,14 +130,14 @@ class PopularMoviesFragment : Fragment(), MovieListAdapter.RecyclerViewItemClick
     override fun itemClick(position: Int, item: Movie) {
         val bundle = Bundle()
         bundle.putInt("id", item.id)
-        val movieInfoFragment =
-            MovieInfoFragment()
+        val movieInfoFragment = MovieInfoFragment()
         movieInfoFragment.arguments = bundle
-        parentFragmentManager.beginTransaction().add(R.id.frameLayout, movieInfoFragment).addToBackStack(null).commit()
+        parentFragmentManager.beginTransaction().add(R.id.frameLayout, movieInfoFragment)
+            .addToBackStack(null).commit()
         requireActivity().bottom_navigation.visibility = View.GONE
     }
 
-    override fun like(position: Int, item: Movie) {
+    override fun addToFavourites(position: Int, item: Movie) {
         movieListViewModel.addToFavourites(item)
         sharedViewModel.setMovie(item)
     }

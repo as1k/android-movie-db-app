@@ -118,7 +118,7 @@ class MovieInfoFragment : Fragment() {
         title.text = movie.title
         overview.text = movie.overview
         releaseDate.text = movie.releaseDate
-        if (movie.includeAdult)
+        if (movie.includeAdult!!)
             adultContent.text = getString(R.string.adult_content)
         else
             adultContent.text = getString(R.string.not_adult_content)

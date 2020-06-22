@@ -19,11 +19,11 @@ import retrofit2.converter.gson.GsonConverterFactory
 import org.koin.androidx.viewmodel.dsl.viewModel
 
 val storageModule = module {
-    single<MovieDao> { getMovieDao(context = get()) }
+    single { getMovieDao(context = get()) }
 }
 
 val networkModule = module {
-    single<MovieApi> { createApiService() }
+    single { createApiService() }
 }
 
 val repositoryModule = module {
@@ -45,7 +45,9 @@ val appModule = listOf(
     viewModelModule
 )
 
-private fun getMovieDao(context: Context): MovieDao { return MovieDatabase.getDatabase(context).movieDao() }
+private fun getMovieDao(context: Context): MovieDao {
+    return MovieDatabase.getDatabase(context).movieDao()
+}
 
 private fun createApiService(): MovieApi {
     return Retrofit.Builder()
