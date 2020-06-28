@@ -24,7 +24,7 @@ interface MovieDao {
     @Query("SELECT * FROM movie_table WHERE liked = :liked")
     fun getLikedMovies(liked: Boolean): List<Movie>
 
-    @Query("update movie_table set liked = :likeCnt where id = :id")
+    @Query("UPDATE movie_table SET liked = :likeCnt WHERE id = :id")
     fun setLikeStatusById(likeCnt: Boolean, id: Int?)
 
     @Query("SELECT liked FROM movie_table where id = :id")

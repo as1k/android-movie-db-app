@@ -7,53 +7,61 @@ import com.example.movie_db.BuildConfig
 import com.example.movie_db.model.data.authentication.CurrentUser
 import com.example.movie_db.model.data.movie.Movie
 import com.example.movie_db.model.data.movie.FavouriteResponse
+import com.example.movie_db.model.network.MovieApiResponse
 import com.example.movie_db.model.repository.MovieRepository
 import com.google.gson.Gson
 import com.google.gson.JsonObject
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
 import java.lang.Exception
-import kotlin.coroutines.CoroutineContext
-import kotlinx.coroutines.*
 
-class MovieInfoViewModel(private val movieRepository: MovieRepository) : ViewModel(),
-    CoroutineScope {
-    private val job = Job()
-    var liveData = MutableLiveData<State>()
+class MovieInfoViewModel(private val movieRepository: MovieRepository) : ViewModel() {
 
-    override val coroutineContext: CoroutineContext
-        get() = Dispatchers.Main + job
+    val liveData = MutableLiveData<State>()
+    private var disposable = CompositeDisposable()
+
+//    private val job = Job()
+//    override val coroutineContext: CoroutineContext
+//        get() = Dispatchers.Main + job
 
     override fun onCleared() {
         super.onCleared()
-        job.cancel()
+        disposable.clear()
+//        job.cancel()
     }
 
     fun getMovie(movieId: Int?) {
         liveData.value = State.ShowLoading
-        launch {
-            val movie = withContext(Dispatchers.IO) {
-                try {
-                    val response = movieRepository
-                        .getMovieRemote(movieId, BuildConfig.MOVIE_DB_API_KEY)
-                    if (response != null) {
-                        if (response.liked) {
-                            movieRepository.setLikeStatusByIdLocal(true, response.id)
+        disposable.add(
+            movieRepository.getMovieRemote(movieId, BuildConfig.MOVIE_DB_API_KEY)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                    { result ->
+                        when (result) {
+                            is MovieApiResponse.Success<Movie> -> {
+                                Log.d("my_debug", result.result.toString())
+                                if (result.result.liked) {
+                                    movieRepository.setLikeStatusByIdLocal(true, result.result.id)
+                                }
+                                liveData.value = State.HideLoading
+                                liveData.value = State.Result(result.result)
+                            }
+                            is MovieApiResponse.Error -> {
+                                Log.d("my_debug", result.error)
+                                movieRepository.getMovieInfoByIdLocal(movieId)
+                            }
                         }
-                    }
-                    response
-                } catch (e: Exception) {
-                    movieRepository.getMovieInfoByIdLocal(movieId)
-                }
-            }
-            liveData.value = State.HideLoading
-            liveData.value = State.Result(movie)
-        }
+                    },
+                    { error ->
+                        error.printStackTrace()
+                        Log.d("my_debug", error.toString())
+                    })
+        )
     }
 
-    fun likeMovie(movie: Movie) {
+    fun addToFavourites(movie: Movie) {
         try {
             movie.liked = !movie.liked
             val body = JsonObject().apply {
@@ -61,54 +69,79 @@ class MovieInfoViewModel(private val movieRepository: MovieRepository) : ViewMod
                 addProperty("media_id", movie.id)
                 addProperty("favorite", movie.liked)
             }
-            likeUnlikeMovies(body)
+            updateFavourites(body)
             movieRepository.insertMovieInfoLocal(movie)
         } catch (e: Exception) {
             Log.d("my_debug", e.toString())
         }
     }
 
-    private fun likeUnlikeMovies(body: JsonObject) {
-        launch {
-            try {
-                movieRepository.likeUnlikeMoviesCoroutineRemote(
-                    CurrentUser.user?.userId,
-                    BuildConfig.MOVIE_DB_API_KEY,
-                    CurrentUser.user?.sessionId,
-                    body
-                )
-            } catch (e: Exception) { }
-        }
+    private fun updateFavourites(body: JsonObject) {
+        disposable.add(
+            movieRepository.likeUnlikeMoviesRemote(
+                CurrentUser.user?.userId,
+                BuildConfig.MOVIE_DB_API_KEY,
+                CurrentUser.user?.sessionId,
+                body
+            )
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                { result ->
+                    when (result) {
+                        is MovieApiResponse.Success<JsonObject> -> {
+                            Log.d("my_debug", result.result.toString())
+                        }
+                        is MovieApiResponse.Error -> {
+                            Log.d("my_debug", result.error)
+                        }
+                    }
+                },
+                { error ->
+                    error.printStackTrace()
+                    Log.d("my_debug", error.toString())
+                })
+        )
     }
 
     fun isLikedMovie(movieId: Int?) {
-        launch {
-            val likeInt = withContext(Dispatchers.IO) {
-                try {
-                    val response = movieRepository.isLikedRemote(
-                        movieId,
-                        BuildConfig.MOVIE_DB_API_KEY,
-                        CurrentUser.user?.sessionId
-                    )
-                    val like = Gson().fromJson(
-                        response,
-                        FavouriteResponse::class.java
-                    ).favorite
-                    if (like) {
-                        movieRepository.setLikeStatusByIdLocal(true, movieId)
-                        1
-                    } else {
-                        movieRepository.setLikeStatusByIdLocal(false, movieId)
-                        0
+        disposable.add(
+            movieRepository.isLikedRemote(
+                movieId,
+                BuildConfig.MOVIE_DB_API_KEY,
+                CurrentUser.user?.sessionId
+            )
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                { result ->
+                    when (result) {
+                        is MovieApiResponse.Success<JsonObject> -> {
+                            Log.d("my_debug", result.result.toString())
+                            val like = Gson().fromJson(
+                                result.result,
+                                FavouriteResponse::class.java
+                            ).favorite
+                            if (like) {
+                                movieRepository.setLikeStatusByIdLocal(true, movieId)
+                                liveData.value = State.IsFavorite(1)
+                            } else {
+                                movieRepository.setLikeStatusByIdLocal(false, movieId)
+                                liveData.value = State.IsFavorite(0)
+                            }
+                        }
+                        is MovieApiResponse.Error -> {
+                            Log.d("my_debug", result.error)
+                            movieRepository.checkIsLikedByIdLocal(movieId)
+                        }
                     }
-                } catch (e: Exception) {
-                    movieRepository.checkIsLikedByIdLocal(movieId)
-                }
-            }
-            liveData.value = State.IsFavorite(likeInt)
-        }
+                },
+                { error ->
+                    error.printStackTrace()
+                    Log.d("my_debug", error.toString())
+                })
+        )
     }
-
 
     sealed class State {
         object ShowLoading : State()

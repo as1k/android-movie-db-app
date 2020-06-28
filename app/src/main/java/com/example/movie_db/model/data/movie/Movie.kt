@@ -31,11 +31,12 @@ data class Movie(
     var includeAdult: Boolean = false,
 
     @SerializedName("backdrop_path")
-    var backdropPath: String? = null,
+    var backdropPath: String = "",
 
     @SerializedName("poster_path")
     var posterPath: String = "",
 
+    @SerializedName("liked")
     var liked: Boolean = false,
 
     @Ignore var position: Int = 0

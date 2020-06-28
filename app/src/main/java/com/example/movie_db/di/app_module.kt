@@ -17,6 +17,7 @@ import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import org.koin.androidx.viewmodel.dsl.viewModel
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 
 val storageModule = module {
     single { getMovieDao(context = get()) }
@@ -52,6 +53,7 @@ private fun getMovieDao(context: Context): MovieDao {
 private fun createApiService(): MovieApi {
     return Retrofit.Builder()
         .baseUrl(BuildConfig.BASE_URL)
+        .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
         .addConverterFactory(GsonConverterFactory.create())
         .build()
         .create(MovieApi::class.java)

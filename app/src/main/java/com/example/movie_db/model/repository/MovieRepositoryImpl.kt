@@ -4,7 +4,9 @@ import android.util.Log
 import com.example.movie_db.model.data.movie.Movie
 import com.example.movie_db.model.database.MovieDao
 import com.example.movie_db.model.network.MovieApi
+import com.example.movie_db.model.network.MovieApiResponse
 import com.google.gson.JsonObject
+import io.reactivex.Single
 
 class MovieRepositoryImpl(
     private val movieApi : MovieApi,
@@ -47,22 +49,67 @@ class MovieRepositoryImpl(
     }
 
     // remote
-    override suspend fun getMovieListRemote(apiKey: String, page: Int): List<Movie>? =
-        movieApi.getMovieListCoroutine(apiKey, page).body()?.results
-
-    override suspend fun getMovieRemote(movieId: Int?, apiKey: String): Movie? =
-        movieApi.getMovieCoroutine(movieId, apiKey).body()
-
-    override suspend fun getLikedMovieListRemote(
-        accountId: Int?,
+    override fun getMovieListRemote(
         apiKey: String,
-        sessionId: String?
-    ): List<Movie>? =
-        movieApi.getLikedMovieListCoroutine(accountId, apiKey, sessionId).body()?.results
+        page: Int
+    ): Single<MovieApiResponse<List<Movie>>> =
+        movieApi.getMovieList(apiKey, page)
+            .map { response ->
+                if (response.isSuccessful) {
+                    val movieList = response.body()?.results ?: emptyList()
+                    MovieApiResponse.Success(movieList)
+                } else {
+                    MovieApiResponse.Error<List<Movie>>("Get movie list response error")
+                }
+            }
 
-    override suspend fun likeUnlikeMoviesCoroutineRemote(accountId: Int?, apiKey: String, sessionId: String?, body: JsonObject): JsonObject? =
-        movieApi.likeUnlikeMoviesCoroutine(accountId, apiKey, sessionId, body).body()
+    override fun getMovieRemote(movieId: Int?, apiKey: String): Single<MovieApiResponse<Movie>> =
+        movieApi.getMovie(movieId, apiKey)
+            .map { response ->
+                if (response.isSuccessful) {
+                    val movie = response.body()!!
+                    MovieApiResponse.Success(movie)
+                } else {
+                    MovieApiResponse.Error<Movie>("Get Movie response Error")
+                }
+            }
 
-    override suspend fun isLikedRemote(movieId: Int?, apiKey: String, sessionId: String?): JsonObject? =
-        movieApi.isLikedCoroutine(movieId, apiKey, sessionId).body()
+    override fun getLikedMovieListRemote(
+        accountId: Int?, apiKey: String, sessionId: String?
+    ): Single<MovieApiResponse<List<Movie>>> =
+        movieApi.getLikedMovieList(accountId, apiKey, sessionId)
+            .map { response ->
+                if(response.isSuccessful) {
+                    val likedMovieList = response.body()?.results ?: emptyList()
+                    MovieApiResponse.Success(likedMovieList)
+                } else {
+                    MovieApiResponse.Error<List<Movie>>("Get liked movie list response error")
+                }
+            }
+
+    override fun likeUnlikeMoviesRemote(
+        accountId: Int?, apiKey: String, sessionId: String?, body: JsonObject
+    ): Single<MovieApiResponse<JsonObject>> =
+        movieApi.likeUnlikeMovies(accountId, apiKey, sessionId, body)
+            .map { response ->
+                if(response.isSuccessful) {
+                    val jsonObject = response.body()!!
+                    MovieApiResponse.Success(jsonObject)
+                } else {
+                    MovieApiResponse.Error<JsonObject>("Like Unlike Movies response error")
+                }
+            }
+
+    override fun isLikedRemote(
+        movieId: Int?, apiKey: String, sessionId: String?
+    ): Single<MovieApiResponse<JsonObject>> =
+        movieApi.isLiked(movieId, apiKey, sessionId)
+            .map { response ->
+                if(response.isSuccessful) {
+                    val jsonObject = response.body()!!
+                    MovieApiResponse.Success(jsonObject)
+                } else {
+                    MovieApiResponse.Error<JsonObject>("Is liked response error")
+                }
+            }
 }

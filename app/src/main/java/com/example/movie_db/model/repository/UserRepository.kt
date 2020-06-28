@@ -1,16 +1,28 @@
 package com.example.movie_db.model.repository
 
+import com.example.movie_db.model.network.MovieApiResponse
 import com.google.gson.JsonObject
+import io.reactivex.Single
 
 interface UserRepository {
 
-    suspend fun getTokenRemote(apiKey: String): JsonObject?
+    fun getTokenRemote(
+        apiKey: String
+    ): Single<MovieApiResponse<JsonObject>>
 
-    suspend fun validateWithLoginRemote(apiKey: String, body: JsonObject): JsonObject?
+    fun validateWithLoginRemote(
+        apiKey: String, body: JsonObject
+    ): Single<MovieApiResponse<JsonObject>>
 
-    suspend fun getCurrentAccountRemote(apiKey: String, sessionId: String): JsonObject?
+    fun getCurrentAccountRemote(
+        apiKey: String, sessionId: String
+    ): Single<MovieApiResponse<JsonObject>>
 
-    suspend fun getSessionRemote(apiKey: String, body: JsonObject): JsonObject?
+    fun getSessionRemote(
+        apiKey: String, body: JsonObject
+    ): Single<MovieApiResponse<JsonObject>>
 
-    suspend fun deleteSessionRemote(apiKey: String, body: JsonObject): JsonObject?
+    fun deleteSessionRemote(
+        apiKey: String, body: JsonObject
+    ): Single<MovieApiResponse<JsonObject>>
 }

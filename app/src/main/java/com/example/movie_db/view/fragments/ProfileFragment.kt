@@ -22,7 +22,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class ProfileFragment : Fragment() {
 
-    private val profileViewModel: ProfileViewModel by viewModel<ProfileViewModel>()
+    private val profileViewModel: ProfileViewModel by viewModel()
     private lateinit var progressBar: ProgressBar
     private lateinit var username: TextView
     private lateinit var name: TextView
@@ -51,7 +51,7 @@ class ProfileFragment : Fragment() {
         progressBar = view.findViewById(R.id.progressBarProfile)
         btnLogout = view.findViewById(R.id.btnLogout)
         btnLogout.setOnClickListener {
-            profileViewModel.logout(view)
+            profileViewModel.logout()
         }
     }
 

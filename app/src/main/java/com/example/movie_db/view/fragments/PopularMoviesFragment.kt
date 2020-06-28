@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.example.movie_db.view.adapters.MovieListAdapter
@@ -118,9 +117,9 @@ class PopularMoviesFragment : Fragment(), MovieListAdapter.RecyclerViewItemClick
                     swipeRefreshLayout.isRefreshing = false
                 }
                 is MovieListViewModel.State.Result -> {
-                    adapter?.removeFooterLoading()
-                    adapter?.addItems(result.list!!)
-                    adapter?.addFooterLoading()
+                    adapter.removeFooterLoading()
+                    adapter.addItems(result.list!!)
+                    adapter.addFooterLoading()
                     isLoading = false
                 }
             }
